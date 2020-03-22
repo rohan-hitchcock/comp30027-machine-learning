@@ -1,0 +1,10 @@
+*.aux
+*.fls
+*.log
+*.synctex.gz
+*.fdb_latexmk
+.idea/
+venv/
+.vscode/
+*__pycache__/
+
