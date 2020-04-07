@@ -20,7 +20,7 @@ def conditional_eps(data, class_col, class_val, attr, attr_val, eps):
     return p if abs(p) < eps else eps
 
 
-def discrete_priors(class_col, class_vals):
+def discrete_priors(obs, vals):
     """ Estimates the probability of observing each value of a discrete 
         phenomena, based on a series of observations.
 
@@ -33,7 +33,7 @@ def discrete_priors(class_col, class_vals):
             A dictionary keyed by elements of vals with values the estimates of
             the probability of each val
     """
-    return {v: len(class_col[class_col == v]) / len(class_col) for v in class_vals}
+    return {v: len(obs[obs == v]) / len(obs) for v in vals}
 
 
 def calculate_conditionals_discrete(data, class_col, conditional=conditional_laplace):
@@ -48,6 +48,13 @@ def calculate_conditionals_discrete(data, class_col, conditional=conditional_lap
         for cv in class_vals:
             conditional_probs[a][cv] = dict()
             for av in attr_vals:
-                conditional_probs[a][cv][av] = conditional(data, class_col, cv, a, av,1)
+                conditional_probs[a][cv][av] = conditional(data, class_col, cv, a, av, 1)
 
     return conditional_probs
+
+
+def train(data, cnfg, conditional=conditional_laplace):
+    class_col = cnfg['class_col']
+    model = calculate_conditionals_discrete(data, class_col, conditional)
+    priors = discrete_priors(data[class_col], np.unique(data[class_col]))
+    return model, priors
