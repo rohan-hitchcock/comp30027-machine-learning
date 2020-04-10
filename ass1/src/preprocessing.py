@@ -6,12 +6,14 @@ import src.config as config
     there isnt even really a "Main" file. We should still define a config dictionary and use
     the filename to determine which config to use. Anyway, worry about that later."""
 
+""" From piazza I found that we are allowed to use sklearn for K-means to discretize numeric attributes"""
+
 def preprocess(filepath):
     if filepath.endswith('lymphography.data'):
         return preprocess_lymphography(filepath, config.lymphography)
 
 
 def preprocess_lymphography(filepath, cnfg):
-    df = pd.read_csv(filepath, header=None, names=range(cnfg['attributes'] + 1))
+    df = pd.read_csv(filepath, header=cnfg["header"], names=range(cnfg['attributes'] + 1))
     # Preprocess and return
     return df, cnfg

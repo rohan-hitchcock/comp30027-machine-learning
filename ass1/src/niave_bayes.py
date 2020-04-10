@@ -51,10 +51,3 @@ def calculate_conditionals_discrete(data, class_col, conditional=conditional_lap
                 conditional_probs[a][cv][av] = conditional(data, class_col, cv, a, av, 1)
 
     return conditional_probs
-
-
-def train(data, cnfg, conditional=conditional_laplace):
-    class_col = cnfg['class_col']
-    model = calculate_conditionals_discrete(data, class_col, conditional)
-    priors = discrete_priors(data[class_col], np.unique(data[class_col]))
-    return model, priors

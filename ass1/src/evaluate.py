@@ -6,14 +6,17 @@ BETA = 1
 
 
 def evaluate(truth_labels, ybar):
+    """ Evaluates a prediction compared to the ground truth labels according to a number of
+    different metrics. At the moment, so it can be averaged across partitions, just returning fscore"""
     assert (len(truth_labels) == len(ybar))
-    print("Accuracy: " + str(accuracy(truth_labels, ybar)))
+    # print("Accuracy: " + str(accuracy(truth_labels, ybar)))
     cm = confusion_matrix(truth_labels, ybar)
     p = precision(cm)
     r = recall(cm)
-    print("Weighted Precision: " + str(p))
-    print("Weighted Recall: " + str(r))
-    print("F-score (Beta = " + str(BETA) + "): " + str(f_score(p, r, BETA)))
+    # print("Weighted Precision: " + str(p))
+    # print("Weighted Recall: " + str(r))
+    # print("F-score (Beta = " + str(BETA) + "): " + str(f_score(p, r, BETA)))
+    return f_score(p, r, BETA)
 
 
 def accuracy(class_col, ybar):
