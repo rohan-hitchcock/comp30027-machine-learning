@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 
 """ Found out this was allowed on Piazza. Just cant use for training and testing"""
+BETA = 1
 
 
 def evaluate(truth_labels, ybar):
@@ -10,10 +11,9 @@ def evaluate(truth_labels, ybar):
     cm = confusion_matrix(truth_labels, ybar)
     p = precision(cm)
     r = recall(cm)
-    beta = 1
     print("Weighted Precision: " + str(p))
     print("Weighted Recall: " + str(r))
-    print("F-score (Beta = " + str(beta) + "): " + str(f_score(p, r, beta)))
+    print("F-score (Beta = " + str(BETA) + "): " + str(f_score(p, r, BETA)))
 
 
 def accuracy(class_col, ybar):
