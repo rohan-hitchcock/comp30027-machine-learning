@@ -2,22 +2,19 @@ import numpy as np
 import pandas as pd
 
 
-def conditional_laplace(data, class_col, class_val, attr, attr_val, alpha):
-    class_obs = data[data[class_col] == class_val]
-    num_attr_vals = len(np.unique(data[attr]))
-
-    return (len(class_obs[class_obs[attr] == attr_val]) + alpha) / (len(class_obs) + alpha * num_attr_vals)
-
 
 def conditional_no_smoothing(data, class_col, class_val, attr, attr_val):
     class_obs = data[data[class_col] == class_val]
 
+
     return len(class_obs[class_obs[attr] == attr_val]) / len(class_obs)
+
 
 
 def conditional_eps(data, class_col, class_val, attr, attr_val, eps):
     p = conditional_no_smoothing(data, class_col, class_val, attr, attr_val)
     return p if abs(p) < eps else eps
+
 
 
 def discrete_priors(obs, vals):
@@ -33,6 +30,7 @@ def discrete_priors(obs, vals):
             A dictionary keyed by elements of vals with values the estimates of
             the probability of each val
     """
+
     return {v: len(obs[obs == v]) / len(obs) for v in vals}
 
 
@@ -46,8 +44,10 @@ def calculate_conditionals_discrete(data, class_col, conditional=conditional_lap
         attr_vals = np.unique(data[a])
 
         for cv in class_vals:
+
             conditional_probs[a][cv] = dict()
             for av in attr_vals:
                 conditional_probs[a][cv][av] = conditional(data, class_col, cv, a, av, 1)
 
     return conditional_probs
+
