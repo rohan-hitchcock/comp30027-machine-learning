@@ -1,5 +1,24 @@
 import numpy as np
 import pandas as pd
+from collections import namedtuple
+
+
+""" Convenient way to store the data for a learned Naive Bayes model. 
+
+    Fields:
+        discrete:     discrete probability data. A triple-nested dictionary
+                      such that discrete[da][c][x] = P(x|c) where x is a 
+                      value of a discrete attribute da.
+        numeric:      numeric probability data. A dictionary (keyed by attribute 
+                      name) of tuples (mu, sigma) where each is an array of the 
+                      same length as class_vals storing the mean and standard 
+                      deviation of this attribute for each class value.
+        class_vals:   an array of possible values of the class to predict
+        class_priors: an array the same length of class_vals such that the ith
+                      element is the probability of class_vals[i]
+"""
+NBModel = namedtuple("NBModel", ['discrete', 'numeric', 
+                                 'class_vals', 'class_priors'])
 
 
 
@@ -24,7 +43,7 @@ def conditional_eps(data, class_col, class_val, attr, attr_val, eps):
 
 
 
-def discrete_priors(obs, vals):
+def discreteiors(obs, vals):
     """ Estimates the probability of observing each value of a discrete 
         phenomena, based on a series of observations.
 
@@ -34,11 +53,10 @@ def discrete_priors(obs, vals):
             vals: an iterable of possibly observable values
 
         Returns:
-            A dictionary keyed by elements of vals with values the estimates of
-            the probability of each val
+            A numpy array a where a[i] is the probability of observing vals[i]
     """
+    return np.array([np.count_nonzero((obs == v)) / len(obs) for v in vals])
 
-    return {v: len(obs[obs == v]) / len(obs) for v in vals}
 
 
 def calculate_conditionals_discrete(data, class_col, conditional=conditional_laplace):
@@ -63,7 +81,7 @@ def laplace_smoothing(n_attr_obs, n_class_obs, n_attr_vals, alpha):
     return (n_attr_obs + alpha) / (n_class_obs + alpha * n_attr_vals)
 
 # Discrete Naive Bayes ********************************************************
-def train_discrete(df, class_attr, class_vals, d_attr, eps=0):
+def train_discrete_standard(df, class_attr, class_vals, d_attr, eps=0):
     """ For training Naive Bayes on a discrete attribute, with no / simple 
         smoothing.
 
@@ -147,50 +165,96 @@ def train_gaussian(df, class_attr, class_values, num_attr):
         Returns:
             A dictionary (keyed by the class values) of tuples (mean, std)
     """
-    #NOTE: passing class_values since we will need to call this method lots and 
-    #it doesn't change
 
-    params = dict()
-    for cv in class_values:
+    means = np.empty(len(class_values))
+    stdevs = np.empty(len(class_values))
+    for i, cv in enumerate(class_values):
+
+        #A Series which is True wherever cv was observed and false otherwise
         cv_obs = df[class_attr] == cv
-        params[cv] = (df[num_attr][cv_obs].mean(), df[num_attr][cv_obs].std())
+
+        #TODO: write our own functions?
+        #by default Series.mean and Series.std will skip missing vals
+        means[i] = df[num_attr][cv_obs].mean()
+        stdevs[i] = df[num_attr][cv_obs].std()
     
-    #TODO: consider changing this to return an array / series ?
-    return params
+    return (means, stdevs)
 
 
 
 # ******************************************************************************
-def guassian_density(x, mu, sigma):
+def guassian_pdf(x, mu, sigma):
     return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp((-(x - mu) ** 2 / 2 * (sigma ** 2)))
 
 
+def train(df, discrete_attrs, numeric_attrs, class_name, 
+          train_discrete=train_discrete_standard, train_numeric=train_gaussian):
+    """ Produce a Naive Bayes model for a given dataset.
+    
+        Args:
+            df: a pd.DataFrame of training data
+            discrete_attrs: a list of discrete attribute names of df
+            numeric_attrs: a list of numeric attribute names of df
+            class_name: the name in df of the class to predict
+            train_discrete: a callable 
+                train_discrete(df, class_name, class_vals, attr) which calculates
+                the conditional probabilities of a discrete attribute attr
+            train_numeric: a callable 
+                train_numeric(df, class_name, class_vals, attr) which calculates
+                the means and standard deviations of a numeric attribute attr
+        
+        Returns:
+            A NBModel object
+    """
+    class_vals = df[class_name].unique()
 
-def predict(df, d_attrs, d_pr, n_attrs, n_pr, class_vals, class_piors):
+    discrete = dict()
+    for da in discrete_attrs:
+        discrete[da] = train_discrete(df, class_name, class_vals, da)
 
-    ddf = df[d_attrs]
-    ndf = df[n_attrs]
+    numeric = dict()
+    for na in numeric_attrs:
+        numeric[na] = train_numeric(df, class_name, class_vals, na)
+    
+    class_priors = discreteiors(df[class_name].to_numpy(), class_vals)
 
-    predictions = pd.Series(np.empty(len(df), dtype=class_vals.dtype), index=df.index)
+    return NBModel(discrete, numeric, class_vals, class_priors)
 
-    for i, row in df.rows():
+def predict(df, nbm):
+    """ Predict class labels using a Naive Bayes model.
 
-        class_probs = np.empty(len(class_vals))
-        for i, cv in class_vals:
+        Args:
+            df: a pd.DataFrame storing training instances.
+            nbm: a NBModel object trained to predict on instances in df
+        Returns:
+            A pd.Series of class labels, with index equal to df.index
+    """
+
+    #numeric and discrete attributes 
+    n_attrs = list(nbm.numeric.keys())
+    d_attrs = list(nbm.discrete.keys())
+
+    #means and standard deviations for numeric attributes
+    means, stdevs = nbm.numeric
+
+    predictions = pd.Series(np.empty(len(df), dtype=nbm.class_vals.dtype), index=df.index)
+
+    for idx, row in df.rows():
+
+        class_likelyhoods = np.empty(len(nbm.class_vals))
+        for i, cv in enumerate(nbm.class_vals):
             
+            cl = nbm.class_priors[cv]
 
-            mu, sigma = n_pr
-            
+            for a, x in zip(n_attrs, row[n_attrs]):
+                if pd.notna(x):
+                    cl *= guassian_pdf(x, means[a][i], stdevs[a][i])
 
-            n_part = np.prod([
-                guassian_density(x, mu[a][cv], sigma[a][cv]) for a, x in zip(n_attrs, row[n_attrs])
-            ])
+            for a, x in zip(d_attrs, row[d_attrs]):
+                if pd.notna(x):
+                    cl *= nbm.discrete[a][cv][x]
 
-            d_part = np.prod([
-                d_pr[a][cv][x] for a, x in zip(d_attrs, row[d_attrs]) 
-            ])
+            class_likelyhoods[i] = cl
 
-            class_probs[i] = class_piors[cv] * n_part * d_part
-
-        predictions[i] = class_vals[np.argmax(class_probs)]
+        predictions[idx] = nbm.class_vals[np.argmax(class_likelyhoods)]
     return predictions
