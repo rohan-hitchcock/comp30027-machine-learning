@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from collections import namedtuple
-
+from math import log
 
 """ Convenient way to store the data for a learned Naive Bayes model. 
 
@@ -200,7 +200,7 @@ def predict(df, nbm):
         for i, cv in enumerate(nbm.class_vals):
 
             """changed to cv-1 because the class values """
-            cl = nbm.class_priors[i]
+            cl = log(nbm.class_priors[i])
 
             if n_attrs:
                 for a, x in zip(n_attrs, row[n_attrs]):
@@ -209,14 +209,14 @@ def predict(df, nbm):
                     means, stdevs = nbm.numeric[a]
 
                     if pd.notna(x):
-                        cl *= guassian_pdf(x, means[i], stdevs[i])
+                        cl += log(guassian_pdf(x, means[i], stdevs[i]))
 
             if d_attrs:
                 for a, x in zip(d_attrs, row[d_attrs]):
 
                     #TODO: this is not correct, need to change training?
                     if pd.notna(x) and x in nbm.discrete[a][cv]:
-                        cl *= nbm.discrete[a][cv][x]
+                        cl += log(nbm.discrete[a][cv][x])
 
             class_likelyhoods[i] = cl
 
