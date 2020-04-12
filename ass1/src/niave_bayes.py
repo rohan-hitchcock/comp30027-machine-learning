@@ -192,12 +192,6 @@ def predict(df, nbm):
     n_attrs = list(nbm.numeric.keys())
     d_attrs = list(nbm.discrete.keys())
 
-    #means and standard deviations for numeric attributes
-    """Added this guard"""
-    if nbm.numeric:
-        means, stdevs = nbm.numeric ## This isnt working
-
-
     predictions = pd.Series(np.empty(len(df), dtype=nbm.class_vals.dtype), index=df.index)
 
     for idx, row in df.iterrows():
@@ -210,12 +204,18 @@ def predict(df, nbm):
 
             if n_attrs:
                 for a, x in zip(n_attrs, row[n_attrs]):
+
+                    #means and standard deviations for this numeric attribute
+                    means, stdevs = nbm.numeric[a]
+
                     if pd.notna(x):
-                        cl *= guassian_pdf(x, means[a][i], stdevs[a][i])
+                        cl *= guassian_pdf(x, means[i], stdevs[i])
 
             if d_attrs:
                 for a, x in zip(d_attrs, row[d_attrs]):
-                    if pd.notna(x):
+
+                    #TODO: this is not correct, need to change training?
+                    if pd.notna(x) and x in nbm.discrete[a][cv]:
                         cl *= nbm.discrete[a][cv][x]
 
             class_likelyhoods[i] = cl
