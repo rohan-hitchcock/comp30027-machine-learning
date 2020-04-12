@@ -8,6 +8,7 @@ import src.config as config
 
 """ From piazza I found that we are allowed to use sklearn for K-means to discretize numeric attributes"""
 
+
 def preprocess(filepath):
     if filepath.endswith('lymphography.data'):
         return preprocess_lymphography(filepath, config.lymphography)
