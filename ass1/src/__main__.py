@@ -1,11 +1,11 @@
 import sys
-import pandas as pd
-import numpy as np
-import src.predict as predict
 import src.preprocessing as pprcs
 import src.evaluate as ev
 import src.baseline as bl
 import src.niave_bayes as nb
+import src.cross_validation as cv
+
+NUM_PARTITIONS = 10
 
 
 def main():
@@ -18,7 +18,9 @@ def main():
 
     df, cnfg = pprcs.preprocess(sys.argv[1])
 
-    ### Insert cross validation track here
+    print("---------- Cross-Val Evaluation ----------")
+    cv_results = cv.cross_validation(df, cnfg, NUM_PARTITIONS)
+    ev.print_eval(cv_results[0], cv_results[1], cv_results[2], cv_results[3])
 
     model = nb.train(df, cnfg["discrete"], cnfg["numeric"], cnfg["class_col"])
 

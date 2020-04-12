@@ -193,24 +193,29 @@ def predict(df, nbm):
     d_attrs = list(nbm.discrete.keys())
 
     #means and standard deviations for numeric attributes
-    means, stdevs = nbm.numeric
+    if nbm.numeric:
+        means, stdevs = nbm.numeric
+
 
     predictions = pd.Series(np.empty(len(df), dtype=nbm.class_vals.dtype), index=df.index)
 
-    for idx, row in df.rows():
+    for idx, row in df.iterrows():
 
         class_likelyhoods = np.empty(len(nbm.class_vals))
         for i, cv in enumerate(nbm.class_vals):
-            
-            cl = nbm.class_priors[cv]
 
-            for a, x in zip(n_attrs, row[n_attrs]):
-                if pd.notna(x):
-                    cl *= guassian_pdf(x, means[a][i], stdevs[a][i])
+            """changed to cv-1 because the class values """
+            cl = nbm.class_priors[i]
 
-            for a, x in zip(d_attrs, row[d_attrs]):
-                if pd.notna(x):
-                    cl *= nbm.discrete[a][cv][x]
+            if n_attrs:
+                for a, x in zip(n_attrs, row[n_attrs]):
+                    if pd.notna(x):
+                        cl *= guassian_pdf(x, means[a][i], stdevs[a][i])
+
+            if d_attrs:
+                for a, x in zip(d_attrs, row[d_attrs]):
+                    if pd.notna(x):
+                        cl *= nbm.discrete[a][cv][x]
 
             class_likelyhoods[i] = cl
 
