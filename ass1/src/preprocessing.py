@@ -11,10 +11,18 @@ import src.config as config
 
 def preprocess(filepath):
     if filepath.endswith('lymphography.data'):
-        return preprocess_lymphography(filepath, config.lymphography)
+        return preprocess_lymphography(filepath, config.config["lymphography"])
+    if filepath.endswith('university.data'):
+        return preprocess_university(filepath, config.config["university"])
 
 
 def preprocess_lymphography(filepath, cnfg):
-    df = pd.read_csv(filepath, header=cnfg["header"], names=range(cnfg['attributes'] + 1))
+    df = pd.read_csv(filepath, header=cnfg["header"], names=range(cnfg['attributes']))
     # Preprocess and return
+    return df, cnfg
+
+
+def preprocess_university(filepath, cnfg):
+    df = pd.read_csv(filepath, header=cnfg["header"], names=range(cnfg['attributes']))
+    #TODO imputate missing values (0) with nans
     return df, cnfg

@@ -136,7 +136,7 @@ def train_gaussian(df, class_attr, class_values, num_attr):
         means[i] = df[num_attr][cv_obs].mean()
         stdevs[i] = df[num_attr][cv_obs].std()
     
-    return (means, stdevs)
+    return means, stdevs
 
 
 
@@ -193,8 +193,9 @@ def predict(df, nbm):
     d_attrs = list(nbm.discrete.keys())
 
     #means and standard deviations for numeric attributes
+    """Added this guard"""
     if nbm.numeric:
-        means, stdevs = nbm.numeric
+        means, stdevs = nbm.numeric ## This isnt working
 
 
     predictions = pd.Series(np.empty(len(df), dtype=nbm.class_vals.dtype), index=df.index)
