@@ -17,8 +17,9 @@ from math import log
         class_priors: an array the same length of class_vals such that the ith
                       element is the probability of class_vals[i]
 """
-NBModel = namedtuple("NBModel", ['discrete', 'numeric', 
+NBModel = namedtuple("NBModel", ['discrete', 'numeric',
                                  'class_vals', 'class_priors'])
+
 
 def discrete_probabilities(obs, vals):
     """ Estimates the probability of observing each value of a discrete 
@@ -37,6 +38,7 @@ def discrete_probabilities(obs, vals):
 
 def laplace_smoothing(n_attr_obs, n_class_obs, n_attr_vals, alpha):
     return (n_attr_obs + alpha) / (n_class_obs + alpha * n_attr_vals)
+
 
 # Discrete Naive Bayes ********************************************************
 def train_discrete_standard(df, class_attr, class_vals, d_attr, eps=0):
@@ -66,7 +68,6 @@ def train_discrete_standard(df, class_attr, class_vals, d_attr, eps=0):
         params[cv] = dict()
         cv_obs = df[df[class_attr] == cv]
         for av in attr_vals:
-            
             num_av_obs = np.count_nonzero((cv_obs[d_attr] == av).to_numpy())
 
             pval = num_av_obs / cv_obs.shape[0]
@@ -74,6 +75,7 @@ def train_discrete_standard(df, class_attr, class_vals, d_attr, eps=0):
             params[cv][av] = pval if pval != 0 else eps
 
     return params
+
 
 def train_discrete_laplace(df, class_attr, class_vals, d_attr, alpha=1):
     """ For training Naive Bayes on a discrete attribute, with laplace smoothing
@@ -101,11 +103,11 @@ def train_discrete_laplace(df, class_attr, class_vals, d_attr, alpha=1):
         params[cv] = dict()
         cv_obs = df[df[class_attr] == cv]
         for av in attr_vals:
-            
             num_av_obs = np.count_nonzero((cv_obs[d_attr] == av).to_numpy())
             params[cv][av] = laplace_smoothing(num_av_obs, cv_obs.shape[0], len(attr_vals), alpha)
 
     return params
+
 
 # Guassian Naive Bayes ********************************************************
 def train_gaussian(df, class_attr, class_values, num_attr):
@@ -127,25 +129,23 @@ def train_gaussian(df, class_attr, class_values, num_attr):
     means = np.empty(len(class_values))
     stdevs = np.empty(len(class_values))
     for i, cv in enumerate(class_values):
-
-        #A Series which is True wherever cv was observed and false otherwise
+        # A Series which is True wherever cv was observed and false otherwise
         cv_obs = df[class_attr] == cv
 
-        #TODO: write our own functions?
-        #by default Series.mean and Series.std will skip missing vals
+        # TODO: write our own functions?
+        # by default Series.mean and Series.std will skip missing vals
         means[i] = df[num_attr][cv_obs].mean()
         stdevs[i] = df[num_attr][cv_obs].std()
 
     return means, stdevs
 
 
-
 # ******************************************************************************
 def guassian_pdf(x, mu, sigma):
-    return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp((-(x - mu) ** 2 / 2 * (sigma ** 2)))
+    return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-0.5 * (((x - mu) / sigma) ** 2))
 
 
-def train(df, discrete_attrs, numeric_attrs, class_name, 
+def train(df, discrete_attrs, numeric_attrs, class_name,
           train_discrete=train_discrete_standard, train_numeric=train_gaussian):
     """ Produce a Naive Bayes model for a given dataset.
     
@@ -173,10 +173,11 @@ def train(df, discrete_attrs, numeric_attrs, class_name,
     numeric = dict()
     for na in numeric_attrs:
         numeric[na] = train_numeric(df, class_name, class_vals, na)
-    
+
     class_priors = discrete_probabilities(df[class_name].to_numpy(), class_vals)
 
     return NBModel(discrete, numeric, class_vals, class_priors)
+
 
 def predict(df, nbm):
     """ Predict class labels using a Naive Bayes model.
@@ -188,7 +189,7 @@ def predict(df, nbm):
             A pd.Series of class labels, with index equal to df.index
     """
 
-    #numeric and discrete attributes 
+    # numeric and discrete attributes
     n_attrs = list(nbm.numeric.keys())
     d_attrs = list(nbm.discrete.keys())
 
@@ -199,27 +200,27 @@ def predict(df, nbm):
         class_likelyhoods = np.empty(len(nbm.class_vals))
         for i, cv in enumerate(nbm.class_vals):
 
-            """changed to cv-1 because the class values """
             cl = loglim(nbm.class_priors[i])
-
-            if n_attrs:
-                for a, x in zip(n_attrs, row[n_attrs]):
-                    if pd.notna(x):
-                        #means and standard deviations for this numeric attribute
-                        means, stdevs = nbm.numeric[a]
-                        cl += loglim(guassian_pdf(x, means[i], stdevs[i]))
 
             if d_attrs:
                 for a, x in zip(d_attrs, row[d_attrs]):
 
-                    #TODO: this is not correct, need to change training?
+                    # TODO: this is not correct, need to change training?
                     if pd.notna(x) and x in nbm.discrete[a][cv]:
                         cl += loglim(nbm.discrete[a][cv][x])
+
+            if n_attrs:
+                for a, x in zip(n_attrs, row[n_attrs]):
+                    if pd.notna(x):
+                        # means and standard deviations for this numeric attribute
+                        means, stdevs = nbm.numeric[a]
+                        cl += loglim(guassian_pdf(x, means[i], stdevs[i]))
 
             class_likelyhoods[i] = cl
 
         predictions[idx] = nbm.class_vals[np.argmax(class_likelyhoods)]
     return predictions
+
 
 def loglim(x):
     """ Returns log(x) for positive x and -float("inf") otherwise"""

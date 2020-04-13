@@ -43,8 +43,8 @@ def precision(cm):
 def recall(cm):
     """Recall of each class, returned as an average weighted by the number of
     instances in each class"""
-
-    recalls = np.diag(cm) / np.sum(cm, axis=1)
+    fp = np.sum(cm, axis=1)
+    recalls = np.diag(cm) / np.where(fp == 0, 1, fp)
     weights = np.sum(cm, axis=1) / cm.sum()
     return np.sum(recalls * weights)
 
