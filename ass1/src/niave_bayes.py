@@ -135,7 +135,7 @@ def train_gaussian(df, class_attr, class_values, num_attr):
         #by default Series.mean and Series.std will skip missing vals
         means[i] = df[num_attr][cv_obs].mean()
         stdevs[i] = df[num_attr][cv_obs].std()
-    
+
     return means, stdevs
 
 
@@ -200,25 +200,28 @@ def predict(df, nbm):
         for i, cv in enumerate(nbm.class_vals):
 
             """changed to cv-1 because the class values """
-            cl = log(nbm.class_priors[i])
+            cl = loglim(nbm.class_priors[i])
 
             if n_attrs:
                 for a, x in zip(n_attrs, row[n_attrs]):
-
-                    #means and standard deviations for this numeric attribute
-                    means, stdevs = nbm.numeric[a]
-
                     if pd.notna(x):
-                        cl += log(guassian_pdf(x, means[i], stdevs[i]))
+                        #means and standard deviations for this numeric attribute
+                        means, stdevs = nbm.numeric[a]
+                        cl += loglim(guassian_pdf(x, means[i], stdevs[i]))
 
             if d_attrs:
                 for a, x in zip(d_attrs, row[d_attrs]):
 
                     #TODO: this is not correct, need to change training?
                     if pd.notna(x) and x in nbm.discrete[a][cv]:
-                        cl += log(nbm.discrete[a][cv][x])
+                        cl += loglim(nbm.discrete[a][cv][x])
 
             class_likelyhoods[i] = cl
 
         predictions[idx] = nbm.class_vals[np.argmax(class_likelyhoods)]
     return predictions
+
+def loglim(x):
+    """ Returns log(x) for positive x and -float("inf") otherwise"""
+    return log(x) if x > 0 else -float("inf")
+    

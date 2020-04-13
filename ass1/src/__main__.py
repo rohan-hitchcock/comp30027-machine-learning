@@ -16,7 +16,10 @@ def main():
         Must be from within the ass1 folder
         """
 
+    
+    print(sys.argv[1])
     df, cnfg = pprcs.preprocess(sys.argv[1])
+
 
     print("---------- Cross-Val Evaluation ----------")
     cv_results = cv.cross_validation(df, cnfg, NUM_PARTITIONS)

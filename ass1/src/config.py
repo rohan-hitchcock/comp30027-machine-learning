@@ -10,7 +10,7 @@ config = {
         "duplicates": False
     },
     "university": {
-        "instances": 285,
+        "instances": 231,
         "header": 0,
         "attributes": 17,
         "class_col": 15,
@@ -18,5 +18,14 @@ config = {
         "discrete": [1, 2, 3, 8, 10, 13, 14, 16],
         "numeric": [4, 5, 6, 7, 9, 11, 12],
         "duplicates": False
+    },
+    "adult": {
+        "instances": 32561,
+        "header": None,
+        "attributes": 15, 
+        "class_col": 14,
+        "missing_values": '?',
+        "discrete": [1, 3, 4, 5, 6, 7, 8, 9, 13],
+        "numeric": [0, 2, 10, 11, 12]
     }
 }
