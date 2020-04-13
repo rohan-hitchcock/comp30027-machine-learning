@@ -70,7 +70,6 @@ def preprocess_adult(filepath, cnfg):
         print (f"{col}: ({label}) dtype={df.dtypes[col]}")
         if label == "discrete" or label == "class":
             vals = df[col].unique()
-            vals.sort()
             print (f"values ({len(vals)}): {vals}")
 
         num_missing = np.count_nonzero(df[col].isna())

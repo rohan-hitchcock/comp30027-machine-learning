@@ -25,7 +25,7 @@ def main():
     cv_results = cv.cross_validation(df, cnfg, NUM_PARTITIONS)
     ev.print_eval(cv_results[0], cv_results[1], cv_results[2], cv_results[3])
 
-    model = nb.train(df, cnfg["discrete"], cnfg["numeric"], cnfg["class_col"])
+    model = nb.train(df, cnfg["discrete"], cnfg["numeric"], cnfg["class_col"], train_discrete=nb.train_discrete_laplace)
 
     predictions = nb.predict(df, model)
     truth = df[cnfg["class_col"]]

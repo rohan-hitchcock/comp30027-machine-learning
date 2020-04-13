@@ -75,7 +75,7 @@ def train_discrete_standard(df, class_attr, class_vals, d_attr, eps=0):
 
     return params
 
-def train_discrete_laplace(df, class_attr, class_vals, d_attr, alpha):
+def train_discrete_laplace(df, class_attr, class_vals, d_attr, alpha=1):
     """ For training Naive Bayes on a discrete attribute, with laplace smoothing
 
         For each class value computes the conditional probability of observing 
@@ -224,4 +224,3 @@ def predict(df, nbm):
 def loglim(x):
     """ Returns log(x) for positive x and -float("inf") otherwise"""
     return log(x) if x > 0 else -float("inf")
-    
