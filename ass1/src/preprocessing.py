@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import src.config as config
 
+import os
+
 """Honestly not sure how this is going to work. Seeing as we are submitting a jupyter notebook,
     there isnt even really a "Main" file. We should still define a config dictionary and use
     the filename to determine which config to use. Anyway, worry about that later."""
@@ -9,13 +11,29 @@ import src.config as config
 """ From piazza I found that we are allowed to use sklearn for K-means to discretize numeric attributes"""
 
 
-def preprocess(filepath):
-    if filepath.endswith('lymphography.data'):
-        return preprocess_lymphography(filepath, config.config["lymphography"])
-    if filepath.endswith('university.data'):
-        return preprocess_university(filepath, config.config["university"])
-    if filepath.endswith('adult.data'):
-        return preprocess_adult(filepath, config.config['adult'])
+def preprocess(filepath, print_summary=False):
+
+    #extract the name of the dataset from the filepath
+    pth, fname = os.path.split(filepath)    #pylint:disable=unused-variable
+    fname, ext = os.path.splitext(fname)    #pylint:disable=unused-variable
+
+    if fname not in config.config:
+        raise NotImplementedError(f"Learning on the \'{fname}\' dataset is not supported.")
+    
+    data_config = config.config[fname]
+
+    df = pd.read_csv(
+        filepath, 
+        header=data_config['header'], 
+        names=range(data_config['attributes']),
+        na_values=data_config['missing_values']
+    )
+
+    if print_summary:
+        summarise(df, data_config)
+
+    return df, data_config
+    
 
 
 def preprocess_lymphography(filepath, cnfg):
@@ -51,21 +69,25 @@ def preprocess_adult(filepath, cnfg):
         header=cnfg["header"], 
         names=range(cnfg['attributes']),
         na_values=cnfg['missing_values'])
+    return df, cnfg
 
-
-    #TODO: remove in final version
+def summarise(df, cnfg):
     print("Data summary: -------------------------------------------------------")
     for col in df.columns:
-    
+        
         if col == cnfg['class_col']:
             label = "class"
             
 
-        if col in cnfg['discrete']:
+        elif col in cnfg['discrete']:
             label = "discrete"
 
-        if col in cnfg['numeric']:
+        elif col in cnfg['numeric']:
             label = 'numeric'
+        
+        #column data is not relavent (eg is an ID)
+        else:
+            continue
 
         print (f"{col}: ({label}) dtype={df.dtypes[col]}")
         if label == "discrete" or label == "class":
@@ -76,4 +98,3 @@ def preprocess_adult(filepath, cnfg):
         print(f"missing: {num_missing} / {len(df[col])}\n")
     print("---------------------------------------------------------------------")
 
-    return df, cnfg

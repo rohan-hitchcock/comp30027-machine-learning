@@ -19,8 +19,9 @@ def main():
 
     
     print(sys.argv[1])
-    df, cnfg = pprcs.preprocess(sys.argv[1])
+    df, cnfg = pprcs.preprocess(sys.argv[1], print_summary=True)
 
+    exit()
 
     print("---------- Cross-Val Evaluation ----------")
     cv_results = cv.cross_validation(df, cnfg, NUM_PARTITIONS)
