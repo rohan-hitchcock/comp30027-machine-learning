@@ -98,3 +98,4 @@ def summarise(df, cnfg):
         print(f"missing: {num_missing} / {len(df[col])}\n")
     print("---------------------------------------------------------------------")
 
+    print(df)

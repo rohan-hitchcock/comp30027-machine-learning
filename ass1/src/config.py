@@ -31,7 +31,7 @@ config = {
     "nursery": {
         "instances": 12960,
         "header": None,
-        "class_col": 9,
+        "class_col": 8,
         "missing_values": [],
         "attributes": 9,
         "discrete": [0, 1, 2, 3, 4, 5, 6, 7],

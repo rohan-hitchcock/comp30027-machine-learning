@@ -19,9 +19,12 @@ def discretise_equal_width(numeric_series, nbins):
     bin_width = (numeric_series.max() - min_x) / nbins
 
     to_bin_index = lambda x : math.floor((x - min_x) / bin_width)
-    return numeric_series.apply(to_bin_index)
 
-def descretise_k_means(numeric_series, k, repeats):
+    res = numeric_series.apply(to_bin_index)
+    res.name = numeric_series.name
+    return res
+
+def descretise_k_means(numeric_series, k, repeats=5):
     """ Discretises a numeric data series according to k-means 
 
         Assumes no missing values.
@@ -38,19 +41,41 @@ def descretise_k_means(numeric_series, k, repeats):
     #store multiple runs of k-means in a dataframe
     discretised = pd.DataFrame(index=numeric_series.index)
 
-    for _ in range(repeats):
+    for run_num in range(repeats):
 
         #TODO: does sorting seeds enough to make sure categories are matched up
         #between runs?
-        seeds = np.random.choice(numeric_series, k, replace=False)
-        seeds.sort()
+        centroids = np.random.choice(numeric_series, k, replace=False)
+        centroids.sort()
 
-        to_discrete = lambda x : np.argmin([abs(x - sd) for sd in seeds])
+        to_discrete = lambda x : np.argmin([abs(x - sd) for sd in centroids])
 
-        discretised = discretised.join(numeric_series.apply(to_discrete))
+        clusters = k * [[]]
+
+        while True:
+
+            new_clusters = k * [[]]
+
+            for x in numeric_series:
+                new_clusters[to_discrete(x)].append(x)
+
+            if new_clusters == clusters:
+                break
+
+            clusters = new_clusters
+            for i, cluster in enumerate(clusters):
+                centroids[i] = np.mean(cluster)
+
+        #compute discretization for this iteration of kmeans
+        this_disc = numeric_series.apply(to_discrete)           
+        this_disc.name = str(run_num)
+
+        discretised = discretised.join(this_disc)
 
     #return the most frequent class for each value in numeric series
-    return discretised.apply(mode, axis=1)
+    disc_mode = discretised.apply(mode, axis=1)
+    disc_mode.name = numeric_series.name
+    return disc_mode
 
 
 def mode(xs):

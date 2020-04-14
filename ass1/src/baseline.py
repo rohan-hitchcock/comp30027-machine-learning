@@ -56,12 +56,17 @@ def classify_one_r(training_df, class_name, testing_df):
     best_attr = None
     best_predictor = None
 
+    #predict the most common class when an attribute is missing
+    values, counts = np.unique(training_df[class_name], return_counts=True)
+    ind = np.argmax(counts)
+    most_common_class = values[ind]
+
     for attr in training_df.columns.drop(class_name):
 
         attr_groups = training_df[[attr, class_name]].groupby(attr).groups
 
-        attr_predictor = dict()
-        for av, idx in attr_groups.values:
+        attr_predictor = {np.nan: most_common_class}
+        for av, idx in attr_groups.items():
             
             #get most frequent class for av, choosing randomly if more than one
             most_frequent_class = training_df[class_name][idx].mode()
@@ -70,7 +75,7 @@ def classify_one_r(training_df, class_name, testing_df):
             attr_predictor[av] = most_frequent_class.iloc[choice]
 
         #check error rate of this attribute as predictor against training data
-        attr_predictions = np.empty(len(training_df))
+        attr_predictions = np.empty(len(training_df), dtype=training_df[class_name].dtype)
         for i, av in enumerate(training_df[attr]):
             attr_predictions[i] = attr_predictor[av]
 
@@ -85,7 +90,7 @@ def classify_one_r(training_df, class_name, testing_df):
         np.empty(len(testing_df), dtype=training_df[class_name].dtype), 
         index=testing_df.index)
 
-    for i, row in testing_df.rows():
+    for i, row in testing_df.iterrows():
         test_predictions[i] = best_predictor[row[best_attr]]
     
     return test_predictions
