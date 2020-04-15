@@ -5,17 +5,15 @@ from sklearn.metrics import confusion_matrix
 BETA = 1
 
 
-def evaluate(truth_labels, ybar, print=True):
-    """ Evaluates a prediction compared to the ground truth labels according to a number of
-    different metrics. At the moment, so it can be averaged across partitions, just returning fscore"""
-    assert (len(truth_labels) == len(ybar))
-    a = accuracy(truth_labels, ybar)
-    cm = confusion_matrix(truth_labels, ybar)
+def evaluate(truth_labels, predictions, f_score_beta=1):
+    """ Evaluates a prediction compared to the ground truth labels according to 
+        a number of different metrics."""
+    assert (len(truth_labels) == len(predictions))
+    a = accuracy(truth_labels, predictions)
+    cm = confusion_matrix(truth_labels, predictions)
     p = precision(cm)
     r = recall(cm)
-    f = f_score(p, r, BETA)
-    if print:
-        print_eval(a, p, r, f)
+    f = f_score(p, r, f_score_beta)
     return a, p, r, f
 
 
