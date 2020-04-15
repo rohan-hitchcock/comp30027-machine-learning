@@ -1,8 +1,8 @@
 
-"""
+
 import src.niave_bayes as nb
 import src.evaluate as ev
-"""
+
 
 import numpy as np
 import pandas as pd
@@ -51,6 +51,19 @@ def cross_validation(df, cnfg, k):
 """
 
 
+def cross_validation(df, cnfg, k):
+    results = np.zeros((4, 1))
+    for train, test in cross_validation_splits(df, k):
+        model = nb.train(train, cnfg["discrete"], cnfg["numeric"], cnfg["class_col"])
+        predictions = nb.predict(test, model)
+        truth = test[cnfg["class_col"]]
+        a, p, r, f = ev.evaluate(truth, predictions, 1)
+        results[0] += a
+        results[1] += p
+        results[2] += r
+        results[3] += f
+    return results / k
+
 def cross_validation_splits(df, k, seed=0):
 
     #set seed for reproducibility
@@ -68,22 +81,22 @@ def cross_validation_splits(df, k, seed=0):
         yield df.loc[train], df.loc[test]
     
 
-if __name__ == "__main__":
-    df = pd.read_csv("../datasets/lymphography.data")
-
-    df = df.head(20)
-    print(df)
-
-    i = 0
-    for train, test in cross_validation_splits(df, 5):
-        i += 1
-
-        print(f"crossval split {i}")
-        print("train:")
-        print(train)
-        print()
-        print("test:")
-        print(test)
-        print()
-        print()
+# if __name__ == "__main__":
+#     df = pd.read_csv("../datasets/lymphography.data")
+#
+#     df = df.head(20)
+#     print(df)
+#
+#     i = 0
+#     for train, test in cross_validation_splits(df, 5):
+#         i += 1
+#
+#         print(f"crossval split {i}")
+#         print("train:")
+#         print(train)
+#         print()
+#         print("test:")
+#         print(test)
+#         print()
+#         print()
 
