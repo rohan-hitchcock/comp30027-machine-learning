@@ -34,7 +34,7 @@ def cross_validation(df, cnfg, k):
         model = nb.train(train, cnfg["discrete"], cnfg["numeric"], cnfg["class_col"])
         predictions = nb.predict(test, model)
         truth = test[cnfg["class_col"]]
-        a, p, r, f = ev.evaluate(truth, predictions, print=False)
+        a, p, r, f = ev.evaluate(truth, predictions, 1)
         results[0] += a
         results[1] += p
         results[2] += r

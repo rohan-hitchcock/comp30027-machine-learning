@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import math
+from sklearn.preprocessing import KBinsDiscretizer as KBD
+
 
 def discretise_equal_width(numeric_series, nbins):
     """ Discretises a numeric data series accoding to equal-width discretisation
@@ -15,16 +17,12 @@ def discretise_equal_width(numeric_series, nbins):
             A pd.Series with nbins unique values.
     """
 
-    min_x = numeric_series.min()
-    bin_width = (numeric_series.max() - min_x) / nbins
+    est = KBD(n_bins=nbins, encode='ordinal', strategy='uniform')
+    est.fit(numeric_series)
+    return pd.DataFrame(est.transform(numeric_series), dtype='int64', columns=numeric_series.columns)
 
-    to_bin_index = lambda x : math.floor((x - min_x) / bin_width)
 
-    res = numeric_series.apply(to_bin_index)
-    res.name = numeric_series.name
-    return res
-
-def descretise_k_means(numeric_series, k, repeats=5):
+def discretise_k_means(numeric_series, k):
     """ Discretises a numeric data series according to k-means 
 
         Assumes no missing values.
@@ -38,44 +36,9 @@ def descretise_k_means(numeric_series, k, repeats=5):
             A pd.Series with k unique values of the same index as numeric_series
     """
 
-    #store multiple runs of k-means in a dataframe
-    discretised = pd.DataFrame(index=numeric_series.index)
-
-    for run_num in range(repeats):
-
-        #TODO: does sorting seeds enough to make sure categories are matched up
-        #between runs?
-        centroids = np.random.choice(numeric_series, k, replace=False)
-        centroids.sort()
-
-        to_discrete = lambda x : np.argmin([abs(x - sd) for sd in centroids])
-
-        clusters = k * [[]]
-
-        while True:
-
-            new_clusters = k * [[]]
-
-            for x in numeric_series:
-                new_clusters[to_discrete(x)].append(x)
-
-            if new_clusters == clusters:
-                break
-
-            clusters = new_clusters
-            for i, cluster in enumerate(clusters):
-                centroids[i] = np.mean(cluster)
-
-        #compute discretization for this iteration of kmeans
-        this_disc = numeric_series.apply(to_discrete)           
-        this_disc.name = str(run_num)
-
-        discretised = discretised.join(this_disc)
-
-    #return the most frequent class for each value in numeric series
-    disc_mode = discretised.apply(mode, axis=1)
-    disc_mode.name = numeric_series.name
-    return disc_mode
+    est = KBD(n_bins=k, encode='ordinal', strategy='kmeans')
+    est.fit(numeric_series)
+    return pd.DataFrame(est.transform(numeric_series), dtype='int64', columns=numeric_series.columns)
 
 
 def mode(xs):
@@ -89,8 +52,8 @@ def mode(xs):
     """
     vals, counts = np.unique(xs, return_counts=True)
 
-    #find all indices for which the maxium count occurs
+    # find all indices for which the maxium count occurs
     modes_indexes = np.argwhere(counts == np.nanmax(counts)).flatten()
 
-    #randomly return one of the modes
+    # randomly return one of the modes
     return vals[np.random.choice(modes_indexes)]

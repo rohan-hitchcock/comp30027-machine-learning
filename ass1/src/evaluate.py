@@ -5,7 +5,7 @@ from sklearn.metrics import confusion_matrix
 BETA = 1
 
 
-def evaluate(truth_labels, predictions, f_score_beta=1):
+def evaluate(truth_labels, predictions, f_score_beta=1, print_results=False):
     """ Evaluates a prediction compared to the ground truth labels according to 
         a number of different metrics."""
     assert (len(truth_labels) == len(predictions))
@@ -14,6 +14,8 @@ def evaluate(truth_labels, predictions, f_score_beta=1):
     p = precision(cm)
     r = recall(cm)
     f = f_score(p, r, f_score_beta)
+    if print_results:
+        print_eval(a, p, r, f)
     return a, p, r, f
 
 
