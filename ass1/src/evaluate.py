@@ -5,18 +5,25 @@ from sklearn.metrics import confusion_matrix
 BETA = 1
 
 
-def evaluate(truth_labels, ybar):
-    """ Evaluates a prediction compared to the ground truth labels according to a number of
-    different metrics. At the moment, so it can be averaged across partitions, just returning fscore"""
-    assert (len(truth_labels) == len(ybar))
-    # print("Accuracy: " + str(accuracy(truth_labels, ybar)))
-    cm = confusion_matrix(truth_labels, ybar)
+def evaluate(truth_labels, predictions, f_score_beta=1, print_results=False):
+    """ Evaluates a prediction compared to the ground truth labels according to 
+        a number of different metrics."""
+    assert (len(truth_labels) == len(predictions))
+    a = accuracy(truth_labels, predictions)
+    cm = confusion_matrix(truth_labels, predictions)
     p = precision(cm)
     r = recall(cm)
-    # print("Weighted Precision: " + str(p))
-    # print("Weighted Recall: " + str(r))
-    # print("F-score (Beta = " + str(BETA) + "): " + str(f_score(p, r, BETA)))
-    return f_score(p, r, BETA)
+    f = f_score(p, r, f_score_beta)
+    if print_results:
+        print_eval(a, p, r, f)
+    return a, p, r, f
+
+
+def print_eval(a, p, r, f):
+    print("Accuracy: " + str(a))
+    print("Weighted Precision: " + str(p))
+    print("Weighted Recall: " + str(r))
+    print("F-score (Beta = " + str(BETA) + "): " + str(f))
 
 
 def accuracy(class_col, ybar):
@@ -36,7 +43,8 @@ def precision(cm):
 def recall(cm):
     """Recall of each class, returned as an average weighted by the number of
     instances in each class"""
-    recalls = np.diag(cm) / np.sum(cm, axis=1)
+    fp = np.sum(cm, axis=1)
+    recalls = np.diag(cm) / np.where(fp == 0, 1, fp)
     weights = np.sum(cm, axis=1) / cm.sum()
     return np.sum(recalls * weights)
 
