@@ -1,10 +1,15 @@
 \documentclass[11pt]{article}
 
 \usepackage{fancyhdr}
-\usepackage[margin=1in,headheight=13.6pt]{geometry}
+\usepackage{geometry}
 
-
+\usepackage{multirow}
 \usepackage{blindtext}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{graphicx}
+
+\geometry{tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
 
 %header and footer
 \pagestyle{fancy}
@@ -22,5 +27,80 @@
     \date{}
     \maketitle
 
-    \Blindtext
+    \section*{Question 1}
+    We applied the both K-means and equal-width discretisation techniques to all numeric attributes in the four datasets with numeric attributed. We then assessed the na\"{i}ve Bayes model generated from these modified data sets by computing the average F-score over a cross validation split with ten partitions (Figure \ref{fig:q1-discretised-fscores}). We see that in all datasets the non-discretised model (using the usual Gaussian na\"{i}ve Bayes approach for numeric attributes) performs the same or better than models trained on data discretised using the equal width approach. We suggest that this reflects the fact that some information is necessarily lost when discretising numeric data. 
+
+    On the other hand the models trained on data discretised using K-means performed better on the WDBC and Adult datasets than the models trained using numeric data. The models trained on numeric data assume that the data has a Gaussian distribution, so we suggest that the K-means approach can perform better when this assumption is violated. K-means is well-suited to finding natural groupings within data, which may mean the model is more adaptable to different attribute distributions.
+
+    To investigate this idea we plotted histograms of each numeric attribute each of the datasets. Qualitatively, the proportion of numeric attributes judged to be highly non-Gaussian for WDBC (0.60) and Adult (0.67) was higher than the proportion for Wine (0.15). This supports the hypothesis that the K-means approach performs better than the standard Gaussian approach when the data is non-Gaussian, although further investigation is warranted. 
+
+    \begin{figure}[H]
+        \centering
+        \def\svgwidth{\columnwidth}
+        \fbox{\scalebox{0.5}{\input{q1-im.pdf_tex}}}
+        \caption{F-Scores ($\beta = 1$) for various discretisation methods.}
+        \label{fig:q1-discretised-fscores}
+    \end{figure}
+
+    \pagebreak
+    \section*{Question 2}
+    We looked at four baseline classifiers: Uniform (class is chosen uniformly at random), Random (class is chosen randomly according to frequencies of data in the training set), Zero-R (most frequent class is chosen) and One-R (class is predicted using one discrete attribute). These baselines were compared to the na\"{i}ve Bayes classifier by computing their average F-score over a cross validation split with ten partitions. 
+
+    The na\"{i}ve Bayes classifier performed better than all four baselines in all datasets, although not to the same degree. In particular, in the Adult and Bank datasets the performance of the Random and Zero-R classifiers was much closer to the na\"{i}ve Bayes classifier. This could be for two reasons: either data is not suited to na\"{i}ve Bayes classification because it violates some assumption (e.g. numeric attributes are highly non-Gaussian, or attributes are highly correlated), or the class is inherently less predictable from the attributes. If the first case were true we would expect the na\"{i}ve Bayes classifier to have a high error rate (which would be reflected as a lower F-score compared to other datasets). Therefore we suggest that it is more likely that the class is less predictable from the attributes in the Adult and Bank datasets. In this case we would expect all conditional probabilities $P(x|c)$ to be similar for all attribute values $x$ and classes $c$, which would mean the na\"{i}ve Bayes classifier would be dominated by the class priors. This would mean na\"{i}ve Bayes would perform more like the Random and Zero-R baselines, which is exactly what we see in Figure \ref{fig:q2-baseline-fscores}.
+
+
+    \textit{need to talk aout differences between baselines}
+
+    \begin{figure}[H]
+        \centering
+        \def\svgwidth{\columnwidth}
+        \fbox{\scalebox{0.5}{\input{q2-im.pdf_tex}}}
+        \caption{F-Scores ($\beta = 1$) for various baselines.}
+        \label{fig:q2-baseline-fscores}
+    \end{figure}
+
+    \pagebreak
+    \section*{Question 4}
+
+    \begin{figure}[H]
+        \centering
+        \begin{tabularx}{\textwidth}{lr||>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
+            & & Accuracy & Precision & Recall & F-Score ($\beta = 1$) \\
+            \hline
+            \hline
+            \multirow{2}{*}{Mushroom} & No Split & 0.997& 0.997 & 0.997 & 0.997 \\
+            & Cross Val. & 0.997& 0.997 & 0.997 & 0.997 \\
+            \hline
+            \multirow{2}{*}{Adult} & No Split & 0.833& 0.823 & 0.833 & 0.828 \\
+            & Cross Val. & 0.833& 0.823 & 0.833 & 0.828 \\
+            \hline
+            \multirow{2}{*}{Nursery} & No Split & 0.903& 0.906 & 0.904 & 0.904 \\
+            & Cross Val. & 0.903& 0.901 & 0.903 & 0.902 \\
+            \hline
+            \multirow{2}{*}{WBDC} & No Split & 0.940& 0.940 & 0.940 & 0.940 \\
+            & Cross Val. & 0.930& 0.931 & 0.930 & 0.930 \\
+            \hline
+            \multirow{2}{*}{Wine} & No Split & 0.989& 0.989 & 0.989 & 0.989 \\
+            & Cross Val. & 0.972& 0.977 & 0.972 & 0.975 \\
+            \hline
+            \multirow{2}{*}{Bank} & No Split & 0.877& 0.880 & 0.877 & 0.878 \\
+            & Cross Val. & 0.877& 0.879& 0.877 & 0.878 \\
+            \hline
+            \multirow{2}{*}{Lymphography} & No Split & 0.892& 0.893 & 0.892 & 0.893 \\
+            & Cross Val. & 0.763& 0.751 & 0.763 & 0.757 \\
+        \end{tabularx}
+        \caption{No train-test split vs. cross validation (10 partitions).}
+        \label{fig:q4-no-split-vs-cross-val}
+    \end{figure}
+
+    \pagebreak
+    \section*{Question 5}
+    \begin{figure}[H]
+        \centering
+        \def\svgwidth{\columnwidth}
+        \fbox{\scalebox{0.5}{\input{q5-im.pdf_tex}}}
+        \caption{F-Scores ($\beta = 1$) for various baselines.}
+        \label{fig:q2-baseline-fscores}
+    \end{figure}
+
 \end{document}
