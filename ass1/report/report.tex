@@ -46,10 +46,10 @@
     \section*{Question 2}
     We looked at four baseline classifiers: Uniform (class is chosen uniformly at random), Random (class is chosen randomly according to frequencies of data in the training set), Zero-R (most frequent class is chosen) and One-R (class is predicted using one discrete attribute). These baselines were compared to the na\"{i}ve Bayes classifier by computing their average F-score over a cross validation split with ten partitions. 
 
-    The na\"{i}ve Bayes classifier performed better than all four baselines in all datasets, although not to the same degree. In particular, in the Adult and Bank datasets the performance of the Random and Zero-R classifiers was much closer to the na\"{i}ve Bayes classifier. This could be for two reasons: either data is not suited to na\"{i}ve Bayes classification because it violates some assumption (e.g. numeric attributes are highly non-Gaussian, or attributes are highly correlated), or the class is inherently less predictable from the attributes. If the first case were true we would expect the na\"{i}ve Bayes classifier to have a high error rate (which would be reflected as a lower F-score compared to other datasets). Therefore we suggest that it is more likely that the class is less predictable from the attributes in the Adult and Bank datasets. In this case we would expect all conditional probabilities $P(x|c)$ to be similar for all attribute values $x$ and classes $c$, which would mean the na\"{i}ve Bayes classifier would be dominated by the class priors. This would mean na\"{i}ve Bayes would perform more like the Random and Zero-R baselines, which is exactly what we see in Figure \ref{fig:q2-baseline-fscores}.
+    The na\"{i}ve Bayes classifier performed better than all four baselines in all datasets, although not to the same degree. In particular, in the Adult and Bank datasets the performance of the Random and Zero-R classifiers was much closer to the na\"{i}ve Bayes classifier. This could be for two reasons: either data is not suited to na\"{i}ve Bayes classification because it violates some assumption (e.g. numeric attributes are highly non-Gaussian, or attributes are highly correlated), or the class is inherently less predictable from the attributes. If the first case were true we would expect the na\"{i}ve Bayes classifier to have a high error rate, which would be reflected as a lower F-score as compared to other datasets. Therefore we suggest that it is more likely that the class is less predictable from the attributes in the Adult and Bank datasets. In this case we would expect all conditional probabilities $P(x|c)$ to be similar for all attribute values $x$ and classes $c$, which would mean the na\"{i}ve Bayes classifier would be dominated by the class priors. This would mean na\"{i}ve Bayes would perform more like the Random and Zero-R baselines, which is exactly what we see in Figure \ref{fig:q2-baseline-fscores}. The better performance of the baselines in the Adult and Bank datasets can accounted for by the higher relative frequencies of a particular class in these datasets; these baselines are more likely to be correct if one class is significantly more common.
 
 
-    \textit{need to talk aout differences between baselines}
+    \textit{Need to talk about differences between baselines?}
 
     \begin{figure}[H]
         \centering
@@ -88,17 +88,17 @@
             \multirow{2}{*}{Nursery} & No Split & 0.903& 0.906 & 0.904 & 0.904 \\
             & Cross Val. & 0.903& 0.901 & 0.903 & 0.902 \\
             \hline
-            \multirow{2}{*}{WBDC} & No Split & 0.940& 0.940 & 0.940 & 0.940 \\
+            \multirow{2}{*}{WDBC} & No Split & 0.940& 0.940 & 0.940 & 0.940 \\
             & Cross Val. & 0.930& 0.931 & 0.930 & 0.930 \\
             \hline
             \multirow{2}{*}{Wine} & No Split & 0.989& 0.989 & 0.989 & 0.989 \\
-            & Cross Val. & 0.972& 0.977 & 0.972 & 0.975 \\
+            & Cross Val. & 0.972& 0.978 & 0.972 & 0.975 \\
             \hline
             \multirow{2}{*}{Bank} & No Split & 0.877& 0.880 & 0.877 & 0.878 \\
             & Cross Val. & 0.877& 0.879& 0.877 & 0.878 \\
             \hline
             \multirow{2}{*}{Lymphography} & No Split & 0.892& 0.893 & 0.892 & 0.893 \\
-            & Cross Val. & 0.763& 0.751 & 0.763 & 0.757 \\
+            & Cross Val. & 0.784& 0.807 & 0.784 & 0.795 \\
         \end{tabularx}
         \caption{No train-test split vs. cross validation (10 partitions).}
         \label{fig:q4-no-split-vs-cross-val}
