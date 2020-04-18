@@ -61,6 +61,17 @@
 
     \pagebreak
     \section*{Question 4}
+    We applied cross validation by splitting each dataset into 10 randomised partitions. We then trained a Na\"{i}ve Bayers model on 9 of the partitions, and tested on the remainding 1. This was done 10 times, testing on each partition in turn.
+
+    The final Accuracy, Precision, Recall and F-scores were found by averaging the results from testing on each isolated partition. Figure 3 compares these averaged results to the results from training and testing on the entire dataset.
+
+    From the table we can see that the Cross-Validation results are never greater than the No Split results, however they are often very close.
+
+    Cross-Validation is important to ensure that your model is as good as you believe, but our results support the notion that a good model's performance is consistent when trained on enough data. Training on a smaller fraction of the original dataset may have shown a greater difference in performance.
+
+    Lymphography perfomed significantly worse when using Cross-Validation when compared to the other datasets. This is likely due to its small size (148 instances), meaning that the $10\%$ less data each model was trained on significantly impacted its predictive performance.
+
+
 
     \begin{figure}[H]
         \centering
