@@ -4,7 +4,6 @@
 \usepackage{geometry}
 
 \usepackage{multirow}
-\usepackage{blindtext}
 \usepackage{tabularx}
 \usepackage{float}
 \usepackage{graphicx}
@@ -37,7 +36,7 @@
     \begin{figure}[H]
         \centering
         \def\svgwidth{\columnwidth}
-        \fbox{\scalebox{0.8}{\input{q1-im.pdf_tex}}}
+        \fbox{\scalebox{0.75}{\input{q1-im.pdf_tex}}}
         \caption{F-Scores ($\beta = 1$) for various discretisation methods.}
         \label{fig:q1-discretised-fscores}
     \end{figure}
@@ -118,8 +117,23 @@
         \centering
         \def\svgwidth{\columnwidth}
         \fbox{\scalebox{0.8}{\input{q5-im.pdf_tex}}}
-        \caption{F-Scores ($\beta = 1$) for various baselines.}
-        \label{fig:q2-baseline-fscores}
+        \caption{F-Scores ($\beta = 1$) for Add-1 smoothing.}
+        \label{fig:q5-add-1}
     \end{figure}
+    \begin{figure}[H]
+        \centering
+        \def\svgwidth{\columnwidth}
+        \fbox{\scalebox{0.8}{\input{q5_02-im.pdf_tex}}}
+        \caption{F-Scores ($\beta = 1$) for Add-0.2 smoothing.}
+        \label{fig:q5-add-0.2}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \def\svgwidth{\columnwidth}
+        \fbox{\scalebox{0.8}{\input{q5_5-im.pdf_tex}}}
+        \caption{F-Scores ($\beta = 1$) for Add-5 smoothing.}
+        \label{fig:q5-add-5}
+    \end{figure}
+
 
 \end{document}
