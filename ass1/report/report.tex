@@ -58,18 +58,11 @@
 
     \pagebreak
     \section*{Question 4}
-    We applied cross validation by splitting each dataset into 10 randomised partitions. We then trained a Na\"{i}ve Bayers model on 9 of the partitions, and tested on the remainding 1. This was done 10 times, testing on each partition in turn.
+    We implemented a cross validation strategy to evaluate model performance. In our implementation the dataset is split into ten randomised partitions. We then trained a Na\"{i}ve Bayes model on nine of the partitions, and used the remaining partition for testing. This process was repeated ten times, using each partition for testing once. The final accuracy, precision, recall and f-scores were calculated by averaging the results from each cross validation run. Figure \ref{fig:q4-no-split-vs-cross-val} compares these averaged results to the results from training and testing on the entire dataset.
 
-    The final Accuracy, Precision, Recall and F-scores were found by averaging the results from testing on each isolated partition. Figure 3 compares these averaged results to the results from training and testing on the entire dataset.
+    From Figure \ref{fig:q4-no-split-vs-cross-val} we can see that the cross-validation results are never better than the results obtained when no train-test split is used (no-split), which is to be expected. In most datasets the cross-validation performance came very close to the no-split performance. T than the No Split results, however they are often very close. This tells us that our model is generalising well, and that the good performance in the no-split runs is as a result of genuine learning rather than over-fitting. 
 
-    From the table we can see that the Cross-Validation results are never greater than the No Split results, however they are often very close.
-
-    Cross-Validation is important to ensure that your model is as good as you believe, but our results support the notion that a good model's performance is consistent when trained on enough data. Training on a smaller fraction of the original dataset (Setting k to a lower value) may have shown a greater difference in performance, however in our testing we found that this had little effect on larger datasets.
-
-    Lymphography perfomed significantly worse when using Cross-Validation when compared to the other datasets. This is likely due to its small size (148 instances), meaning that the $10\%$ less data each model was trained on significantly impacted its predictive performance.
-
-
-
+    The datasets with the largest discrepancy between no-split and cross-validation performance (wine and lymphography) are also the two smallest datasets. We therefore suggest that this difference in performance is because of a lack of training data, rather than evidence over-fitting in the no-split case. Lymphography also comprises entirely of discrete attributes and no smoothing techniques were used in this question, so less data results in more unobserved events (which have probability zero without smoothing) and hence even worse model performance. We will see in Question 5 that applying smoothing techniques had by far the biggest effect on lymphography. 
     \begin{figure}[H]
         \centering
         \begin{tabularx}{\textwidth}{lr||>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
@@ -103,16 +96,12 @@
 
     \pagebreak
     \section*{Question 5}
-    Without smoothing, a Na\"{i}ve Bayers model gives events that are unlikely (Events we have not seen in training for that particular class, but are not impossible) a probability of 0.
-    Smoothing is a method of giving a non-zero probability to such events, rather than skipping them. With larger datasets, the likelihood of unseen events arising in testing data, that were not encountered in training, is lower. This means smoothing has less effect on overall performance.
+    Without smoothing, a Na\"{i}ve Bayers model gives events that are unlikely -- that is, events we have not seen in training for that particular class, but are not impossible -- a probability of 0. When these events arise in testing data this means the relative likelihood of the relevant class is assigned to be zero, which erases any information obtained from the other attributes of that test instance. Smoothing techniques attempt to get around this by estimating a non-zero probability for these rare events. 
 
-    As can be seen from Figures 4, 5 and 6, the two smallest datasets (Mushroom and Lymphography) are greater impacted by different $k$ values for add-k (Laplace) smoothing.
-
-    For Mushroom, the class can take on 2 values, and it may be the case that these two classes are quite distinct in terms of the attribute values that they generally comprise of.
-    Giving these 'unseen events' a probability may be over estimating the likelihood of these extremely rare events, edging out the wrong class over the other.
-
-    For Lymphography, it is likely that the size of the dataset is the major cause of this behaviour. Due to its 14 attributes, many having more than 2 values, it is very likely that unseen events
-    will be encountered during cross-validation splits. Giving a probability to these events may simply allow the characteristics of each class to show better, as the likelihoods of one class may have been non-uniformly decreased due to a higher number of unseen events for that class.
+    We implemented Laplace (a.k.a Add-k) smoothing, and compared the performance of a classifier using add-k smoothing for $k = 0.2, 1, 5$ to a classifier using no smoothing or simple epsilon smoothing (rare events are given a small fixed probability). In Figures \ref{fig:q5-add-1}, \ref{fig:q5-add-0.2} and \ref{fig:q5-add-5}, we can see that the two smallest datasets (Mushroom and Lymphography) are most greatly impacted by smoothing, while the in the larger datasets virtually no difference was observed. We suggest that this is because in larger datasets the probability  of rare events arising in the training data is much higher, and so there is much less chance for smoothing to take effect.
+    Increasing the value of $k$ exacerbated the difference in performance due to smoothing on the smaller datasets.
+    
+    In general we would expect smoothing to improve the performance of a classifier (as it did in lymphography), but interestingly smoothing had an opposite effect on the mushroom dataset. In mushroom the class can take on 2 values, and it may be the case that these two classes have disjoint (or near-disjoint) sets of attribute values which can appear with each class. Giving unseen events a non-zero probability, when in fact the true probability in most cases should be zero, may lead to the worse performance, especially if only a few attributes are good predictors of the class (so the other attribute values do not provide information about which class to choose).
     \begin{figure}[H]
         \centering
         \def\svgwidth{\columnwidth}
