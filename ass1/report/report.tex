@@ -65,7 +65,7 @@
 
     From the table we can see that the Cross-Validation results are never greater than the No Split results, however they are often very close.
 
-    Cross-Validation is important to ensure that your model is as good as you believe, but our results support the notion that a good model's performance is consistent when trained on enough data. Training on a smaller fraction of the original dataset may have shown a greater difference in performance.
+    Cross-Validation is important to ensure that your model is as good as you believe, but our results support the notion that a good model's performance is consistent when trained on enough data. Training on a smaller fraction of the original dataset (Setting k to a lower value) may have shown a greater difference in performance, however in our testing we found that this had little effect on larger datasets.
 
     Lymphography perfomed significantly worse when using Cross-Validation when compared to the other datasets. This is likely due to its small size (148 instances), meaning that the $10\%$ less data each model was trained on significantly impacted its predictive performance.
 
@@ -104,6 +104,16 @@
 
     \pagebreak
     \section*{Question 5}
+    Without smoothing, a Na\"{i}ve Bayers model gives events that are unlikely (Events we have not seen in training for that particular class, but are not impossible) a probability of 0.
+    Smoothing is a method of giving a non-zero probability to such events, rather than skipping them. With larger datasets, the likelihood of unseen events arising in testing data, that were not encountered in training, is lower. This means smoothing has less effect on overall performance.
+
+    As can be seen from Figures 4, 5 and 6, the two smallest datasets (Mushroom and Lymphography) are greater impacted by different $k$ values for add-k (Laplace) smoothing.
+
+    For Mushroom, the class can take on 2 values, and it may be the case that these two classes are quite distinct in terms of the attribute values that they generally comprise of.
+    Giving these 'unseen events' a probability may be over estimating the likelihood of these extremely rare events, edging out the wrong class over the other.
+
+    For Lymphography, it is likely that the size of the dataset is the major cause of this behaviour. Due to its 14 attributes, many having more than 2 values, it is very likely that unseen events
+    will be encountered during cross-validation splits. Giving a probability to these events may simply allow the characteristics of each class to show better, as the likelihoods of one class may have been non-uniformly decreased due to a higher number of unseen events for that class.
     \begin{figure}[H]
         \centering
         \def\svgwidth{\columnwidth}
