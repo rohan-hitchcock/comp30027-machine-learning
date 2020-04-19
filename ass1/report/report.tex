@@ -109,7 +109,7 @@
     As can be seen from Figures 4, 5 and 6, the two smallest datasets (Mushroom and Lymphography) are greater impacted by different $k$ values for add-k (Laplace) smoothing.
 
     For Mushroom, the class can take on 2 values, and it may be the case that these two classes are quite distinct in terms of the attribute values that they generally comprise of.
-    Giving these 'unseen events' a probability may be over estimating the likelihood of these extremely rare events, edging out the wrong class over the other.
+    Giving these `unseen events' a probability may be over estimating the likelihood of these extremely rare events, edging out the wrong class over the other.
 
     For Lymphography, it is likely that the size of the dataset is the major cause of this behaviour. Due to its 14 attributes, many having more than 2 values, it is very likely that unseen events
     will be encountered during cross-validation splits. Giving a probability to these events may simply allow the characteristics of each class to show better, as the likelihoods of one class may have been non-uniformly decreased due to a higher number of unseen events for that class.
