@@ -31,12 +31,17 @@ d2v200 = pd.read_csv(r"./datasets/review_text_features_doc2vec200/review_text_tr
 # print(d2v200.head(10))
 
 # PCA
+
+# If changing n will have to change graphs
 n = 2
+
 pca = PCA(n_components=n)
 tsvd = TruncatedSVD(n_components=n)
 datasets_dict = {"Count Vectoriser": count_vec, "Doc2Vec50": d2v50, "Doc2Vec100": d2v100, "Doc2Vec200": d2v200}
+
 for name, dataset in datasets_dict.items():
 
+    #PCA cant be used for Sparse matrices, but seems truncatedSVD is better for text processing anyway? Need to read more
     if name == "Count Vectoriser":
         dataset_reduced = tsvd.fit_transform(dataset)
         print(f"Variance explained by each PC for {name}: ", tsvd.explained_variance_ratio_)
@@ -48,6 +53,7 @@ for name, dataset in datasets_dict.items():
 
     # "s" changes size of circles
 
+    # reordering these would probably change which dots are in front of the rest
     plt.scatter(dataset_reduced[low_rating, 0], dataset_reduced[low_rating, 1], c='red',
                 s=1, label='Low Rating')
     plt.scatter(dataset_reduced[med_rating, 0], dataset_reduced[med_rating, 1], c='orange',
