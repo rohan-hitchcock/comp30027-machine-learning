@@ -10,5 +10,5 @@ venv/
 .ipynb_checkpoints/
 *.DS_Store
 
-./ass2/datasets/*
+ass2/datasets/*
 
