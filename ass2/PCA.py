@@ -33,7 +33,7 @@ d2v200 = pd.read_csv(r"./datasets/review_text_features_doc2vec200/review_text_tr
 # -------------- PCA
 datasets_dict = {"Count Vectoriser": count_vec, "Doc2Vec50": d2v50, "Doc2Vec100": d2v100, "Doc2Vec200": d2v200}
 
-# Plotting graphs for smaller number of principle components
+# ------- Plotting graphs for smaller number of principle components
 # If changing n will have to change graphs
 # n = 3
 
@@ -70,8 +70,7 @@ datasets_dict = {"Count Vectoriser": count_vec, "Doc2Vec50": d2v50, "Doc2Vec100"
 #     ax.set_title(f"PCA for {name} with {n} Components", weight="bold", size=14)
 #     plt.show()
 
-# Generating a graph for variance vs. n_components for each text feature
-
+# ----- Generating a graph for variance vs. n_components for each text feature
 variances = {"Count Vectoriser": [], "Doc2Vec50": [], "Doc2Vec100": [], "Doc2Vec200": []}
 
 # Loop to keep adding components until the additional variance gained by a new principle component decreases
