@@ -2,6 +2,8 @@ import pickle
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
+from sklearn.preprocessing import StandardScaler
+
 plt.rcParams['figure.figsize'] = [10, 7]
 import numpy as np
 import scipy
@@ -71,10 +73,12 @@ datasets_dict = {"Count Vectoriser": count_vec, "Doc2Vec50": d2v50, "Doc2Vec100"
 #     plt.show()
 
 # ----- Generating a graph for variance vs. n_components for each text feature
-variances = {"Count Vectoriser": [], "Doc2Vec50": [], "Doc2Vec100": [], "Doc2Vec200": []}
+variances = {"Doc2Vec50": [], "Doc2Vec100": [], "Doc2Vec200": []}
 
 # Loop to keep adding components until the additional variance gained by a new principle component decreases
-for n in range(1, 30):
+scaler = StandardScaler()
+
+for n in range(1, 50):
 
     pca = PCA(n_components=n)
     tsvd = TruncatedSVD(n_components=n)
@@ -83,22 +87,22 @@ for n in range(1, 30):
 
         #PCA cant be used for Sparse matrices, but seems truncatedSVD is better for text processing anyway? Need to read more
         if name == "Count Vectoriser":
-            dataset_reduced = tsvd.fit_transform(dataset)
-
-            variances[name].append(np.sum(tsvd.explained_variance_ratio_))
-
+            continue
         else:
+            # scaled = scaler.fit_transform(dataset)
             dataset_reduced = pca.fit_transform(dataset)
 
             variances[name].append(np.sum(pca.explained_variance_ratio_))
 
-plt.plot(range(1, 30), variances["Count Vectoriser"], 'ro', linestyle='-', label="Count Vectoriser")
-plt.plot(range(1, 30), variances["Doc2Vec50"], 'bo', linestyle='-', label="Doc2Vec50")
-plt.plot(range(1, 30), variances["Doc2Vec100"], 'go', linestyle='-', label="Doc2Vec100")
-plt.plot(range(1, 30), variances["Doc2Vec200"], 'ko', linestyle='-', label="Doc2Vec200")
+plt.plot(range(1, 50), variances["Doc2Vec50"], 'bo', linestyle='-', label="Doc2Vec50")
+plt.plot(range(1, 50), variances["Doc2Vec100"], 'go', linestyle='-', label="Doc2Vec100")
+plt.plot(range(1, 50), variances["Doc2Vec200"], 'ko', linestyle='-', label="Doc2Vec200")
 plt.legend(loc='upper left', shadow=True, title="Text Feature", title_fontsize=12)
 plt.xlabel("Number of Components", size=12)
 plt.ylabel("Total Variance", size=12)
-plt.title("PCA Variance vs. Number of Components", weight="bold", size=14)
+plt.title("Unnormalised PCA Variance vs. Number of Components", weight="bold", size=14)
 plt.show()
 
+
+## Tested the effects or normalising (feature/column wise) each doc2vec output before PCA.
+## resulting graphs are saved, but normalising actually resulted in lower variance explained at each iteration
