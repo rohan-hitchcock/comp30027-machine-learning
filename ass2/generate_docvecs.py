@@ -60,30 +60,30 @@ def compute_doc_embedding(train_corpus, test, dimension):
 
     return doc_test_emb, doc_train_emb
 
-#MAIN
+# MAIN
+if __name__ == "__main__":
+    res_train_review_table = pd.read_csv(r"./datasets/review_text_train.csv", index_col = False, delimiter = ',', header=0)
+    data = res_train_review_table['review']
 
-res_train_review_table = pd.read_csv(r"./datasets/review_text_train.csv", index_col = False, delimiter = ',', header=0)
-data = res_train_review_table['review']
+    data_meta = pd.read_csv(r"./datasets/review_meta_train.csv")
+    class_label = data_meta['rating']
 
-data_meta = pd.read_csv(r"./datasets/review_meta_train.csv")
-class_label = data_meta['rating']
+    for dim in range(25, 301, 25):
+        print(f"running for dim {dim}")
 
-for dim in range(25, 301, 25):
-    print(f"running for dim {dim}")
+        X_train, X_test, y_train, y_test= train_test_split(data, class_label, test_size=0.2, random_state=RANDOM_STATE*dim, stratify=class_label)
 
-    X_train, X_test, y_train, y_test= train_test_split(data, class_label, test_size=0.2, random_state=RANDOM_STATE*dim, stratify=class_label)
+        test_embedding, train_embedding = compute_doc_embedding(X_train, X_test, dim)
+        
+        os.makedirs(f"./datasets/computed/d2v_strat{dim}/")
 
-    test_embedding, train_embedding = compute_doc_embedding(X_train, X_test, dim)
-    
-    os.makedirs(f"./datasets/computed/d2v_strat{dim}/")
+        pd.DataFrame(test_embedding).to_csv(f"./datasets/computed/d2v_strat{dim}/Xtest.csv")
+        pd.DataFrame(train_embedding).to_csv(f"./datasets/computed/d2v_strat{dim}/Xtrain.csv")
+        y_train
 
-    pd.DataFrame(test_embedding).to_csv(f"./datasets/computed/d2v_strat{dim}/Xtest.csv")
-    pd.DataFrame(train_embedding).to_csv(f"./datasets/computed/d2v_strat{dim}/Xtrain.csv")
-    y_train
+        y_train.to_csv(f"./datasets/computed/d2v_strat{dim}/ytrain.csv")
+        y_test.to_csv(f"./datasets/computed/d2v_strat{dim}/ytest.csv")
 
-    y_train.to_csv(f"./datasets/computed/d2v_strat{dim}/ytrain.csv")
-    y_test.to_csv(f"./datasets/computed/d2v_strat{dim}/ytest.csv")
-
-    del test_embedding
-    del train_embedding
+        del test_embedding
+        del train_embedding
 

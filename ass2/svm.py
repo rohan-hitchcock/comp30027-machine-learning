@@ -68,135 +68,161 @@ def evaluate_model(X_file, y, model, num_xval_splits=3):
         Evaluation(np.mean(accuracy_trn), np.mean(fscore_trn), np.mean(precision_trn), np.mean(recall_trn))
     ) 
 
-
-def feature_dim_learning_curve(feature_sets, class_label, model, x_vals, y_metric_name, y_label, title):
-
-    y_vals_test = []
-    y_vals_train = []
-    for i, X in enumerate(feature_sets):
-
-        print(f"run {i}")
-
-        test_eval, train_eval = evaluate_model(X, class_label, model)
-
-        y_vals_test.append(getattr(test_eval, y_metric_name))
-        y_vals_train.append(getattr(train_eval, y_metric_name))
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-
-    ax.plot(x_vals, y_vals_test, 'bo', linestyle='-', label='Test')
-    ax.plot(x_vals, y_vals_test, 'go', linestyle='-', label='Train')
-    
-    ax.set_xaxis('Feature space dimension')
-    ax.set_ylabel(y_label)
-    ax.set_title(title)
-
-    ax.legend(loc='upper left', title_fontsize=12)
-
-    plt.show()
+def compute_class_proportions():
+    data_meta = pd.read_csv(r"./datasets/review_meta_train.csv")
+    class_label = data_meta['rating']
 
 
-
-
-"""
-data50 = pd.read_csv(
-    r"./datasets/review_text_features_doc2vec50/review_text_train_doc2vec50.csv", 
-    index_col=False, delimiter=',', header=None
-)
-
-data100 = pd.read_csv(
-    r"./datasets/review_text_features_doc2vec100/review_text_train_doc2vec100.csv", 
-    index_col=False, delimiter=',', header=None
-)
-
-data200 = pd.read_csv(
-    r"./datasets/review_text_features_doc2vec200/review_text_train_doc2vec200.csv", 
-    index_col=False, delimiter=',', header=None
-)
-"""
-"""
-data50 =  r"./datasets/review_text_features_doc2vec50/review_text_train_doc2vec50.csv"
-data100 = r"./datasets/review_text_features_doc2vec100/review_text_train_doc2vec100.csv"
-data200 = r"./datasets/review_text_features_doc2vec200/review_text_train_doc2vec200.csv"
-
-"""
-
-data_meta = pd.read_csv(r"./datasets/review_meta_train.csv")
-class_label = data_meta['rating']
-
-
-print("original dataset")
-num_instances = len(class_label)
-one_count = np.count_nonzero(class_label == 1)
-three_count = np.count_nonzero(class_label == 3)
-five_count = np.count_nonzero(class_label == 5)
-print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
-print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
-print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
-print(f"Total: {num_instances}")
-
-print("-------------------")
-for dim in range(25, 301, 25):
-
-    print(f"for dimension {dim}")
-    Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
-
-    print("train:")
-    num_instances = len(ytrain)
-    one_count = np.count_nonzero(ytrain == 1)
-    three_count = np.count_nonzero(ytrain == 3)
-    five_count = np.count_nonzero(ytrain == 5)
-
-    print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
-    print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
-    print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
-    print(f"Total: {num_instances}")
-
-    print("test:")
-    num_instances = len(ytest)
-    one_count = np.count_nonzero(ytest == 1)
-    three_count = np.count_nonzero(ytest == 3)
-    five_count = np.count_nonzero(ytest == 5)
-
+    print("original dataset")
+    num_instances = len(class_label)
+    one_count = np.count_nonzero(class_label == 1)
+    three_count = np.count_nonzero(class_label == 3)
+    five_count = np.count_nonzero(class_label == 5)
     print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
     print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
     print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
     print(f"Total: {num_instances}")
 
     print("-------------------")
+    for dim in range(25, 301, 25):
+
+        print(f"for dimension {dim}")
+        Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
+
+        print("train:")
+        num_instances = len(ytrain)
+        one_count = np.count_nonzero(ytrain == 1)
+        three_count = np.count_nonzero(ytrain == 3)
+        five_count = np.count_nonzero(ytrain == 5)
+
+        print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
+        print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
+        print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
+        print(f"Total: {num_instances}")
+
+        print("test:")
+        num_instances = len(ytest)
+        one_count = np.count_nonzero(ytest == 1)
+        three_count = np.count_nonzero(ytest == 3)
+        five_count = np.count_nonzero(ytest == 5)
+
+        print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
+        print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
+        print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
+        print(f"Total: {num_instances}")
+
+        print("-------------------")
+
+def learning_curve(model):
+
+
+    test_eval = {
+        "dim": [],
+        "fscore": [], 
+        "accuracy": [], 
+        "precision": [], 
+        "recall": []
+    }
+
+    train_eval = {
+        "dim": [],
+        "fscore": [], 
+        "accuracy": [], 
+        "precision": [], 
+        "recall": []
+    }
+
+    for dim in range(25, 301, 25):
+        
+        print(f"dim = {dim}")
+
+
+        test_eval["dim"].append(dim)
+        train_eval["dim"].append(dim)
+
+        Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
+
+        model.fit(Xtrain, ytrain)
+
+
+        predictions = model.predict(Xtest)
+
+        test_eval['fscore'].append(metrics.f1_score(ytest, predictions, average='weighted'))
+        test_eval['accuracy'].append(metrics.accuracy_score(ytest, predictions))
+        test_eval['precision'].append(metrics.precision_score(ytest, predictions, average='weighted'))
+        test_eval['recall'].append(metrics.recall_score(ytest, predictions, average='weighted'))
+
+        predictions = model.predict(Xtrain)
+
+        train_eval['fscore'].append(metrics.f1_score(ytrain, predictions, average='weighted'))
+        train_eval['accuracy'].append(metrics.accuracy_score(ytrain, predictions))
+        train_eval['precision'].append(metrics.precision_score(ytrain, predictions, average='weighted'))
+        train_eval['recall'].append(metrics.recall_score(ytrain, predictions, average='weighted'))
+
+        del Xtrain
+        del Xtest
+        del ytrain
+        del ytest
+
+    return pd.DataFrame(train_eval), pd.DataFrame(test_eval)
+
+
+def learning_curve_for_linear_to_delete(model):
+
+
+    test_eval = {
+        "dim": [],
+        "fscore": [], 
+        "accuracy": [], 
+        "precision": [], 
+        "recall": []
+    }
+
+    for dim in range(25, 301, 25):
+        
+        print(f"dim = {dim}")
+
+
+        test_eval["dim"].append(dim)
+
+        Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
+
+        model.fit(Xtrain, ytrain)
+
+
+        predictions = model.predict(Xtest)
+
+        test_eval['fscore'].append(metrics.f1_score(ytest, predictions, average='weighted'))
+        test_eval['accuracy'].append(metrics.accuracy_score(ytest, predictions))
+        test_eval['precision'].append(metrics.precision_score(ytest, predictions, average='weighted'))
+        test_eval['recall'].append(metrics.recall_score(ytest, predictions, average='weighted'))
+
+        del Xtrain
+        del Xtest
+        del ytrain
+        del ytest
+
+    return pd.DataFrame(test_eval)
 
 
 
-"""
-kernal = 'linear'
-model = svm.SVC(C=1, kernel=kernal)
-
-feature_sets = [data50, data100, data200]
-x_vals = [50, 100, 200]
-
-y_metric_name = 'fscore'
-y_label = "F-Score"
-title = "Linear SVM"
-
-feature_dim_learning_curve(feature_sets, class_label, model, x_vals, y_metric_name, y_label, title)
-"""
-
-"""
-data = data50
-data_meta = pd.read_csv(r"./datasets/review_meta_train.csv")
-class_label = data_meta['rating']
-
-for kernal in ['linear', 'poly', 'rbf', 'sigmoid']:
+kernals = ['linear', 'rbf', 'poly', 'sigmoid']
+for kernal in kernals:
+    print(f"kernal = {kernal}")
     
-    model = svm.SVC(C=1, kernel=kernal)
+    model = svm.SVC(kernel=kernal)
 
-    eval_test, eval_train = evaluate_model(data, class_label, model)
-    print(kernal)
-    print(f"Accuracy: {eval_test.accuracy}\n"
-          f"Precision: {eval_test.precision}\n"
-          f"Recall: {eval_test.recall}\n"
-          f"F1Score: {eval_test.fscore}")
 
-    print()
-"""
+    if kernal == 'linear':
+        
+        test_eval = learning_curve_for_linear_to_delete(model)
+
+        test_eval.to_csv(f"results/svm/learning_curve_{kernal}_test.csv")
+
+    else:
+
+        train_eval, test_eval = learning_curve(model)
+
+        train_eval.to_csv(f"results/svm/learning_curve_{kernal}_train.csv")
+        test_eval.to_csv(f"results/svm/learning_curve_{kernal}_test.csv")
+
