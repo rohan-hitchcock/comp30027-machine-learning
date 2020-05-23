@@ -111,7 +111,7 @@ def compute_crossval_split(dim, num_splits):
     splitter = StratifiedKFold(n_splits=num_splits, shuffle=True, random_state=dim*RANDOM_STATE)
 
 
-    os.makedirs(f"./datasets/computed/d2v_xval{dim}/")
+    os.makedirs(f"./datasets/computed/d2v_xval{dim}/", exist_ok=True)
 
     for i, split in enumerate(splitter.split(data, class_label)):
 
@@ -121,7 +121,7 @@ def compute_crossval_split(dim, num_splits):
         train_index, test_index = split
 
         raw_Xtrain, raw_Xtest = data[train_index], data[test_index]
-        ytrain, ytest = data[train_index], data[test_index]
+        ytrain, ytest = class_label[train_index], class_label[test_index]
 
 
         Xtest, Xtrain = compute_doc_embedding(raw_Xtrain, raw_Xtest, dim)
