@@ -230,37 +230,37 @@ result.to_csv("./results/svm/gridsearch_linear_150.csv")
 """
 
 
-print("Original Hold Out:")
-
-Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(150)
-print(Xtrain.head(10))
-print(ytrain.head(10))
-
-print(f"Xtrain count: {len(Xtrain)}")
-print("\n-------------------------------------------------")
-
-counter = 1
-for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(150):
-    print(f"Cross val {counter}:")
-    print(Xtrain.head(10))
-    print(ytrain.head(10))
-
-    print(f"Xtrain count: {len(Xtrain)}")
-
-
-    num_instances = len(ytest)
-    one_count = np.count_nonzero(ytest == 1)
-    three_count = np.count_nonzero(ytest == 3)
-    five_count = np.count_nonzero(ytest == 5)
-
-    print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
-    print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
-    print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
-    print(f"Total: {num_instances}")
-
-    print("\n-------------------------------------------------")
-
-    counter += 1
+# print("Original Hold Out:")
+#
+# Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(150)
+# print(Xtrain.head(10))
+# print(ytrain.head(10))
+#
+# print(f"Xtrain count: {len(Xtrain)}")
+# print("\n-------------------------------------------------")
+#
+# counter = 1
+# for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(150):
+#     print(f"Cross val {counter}:")
+#     print(Xtrain.head(10))
+#     print(ytrain.head(10))
+#
+#     print(f"Xtrain count: {len(Xtrain)}")
+#
+#
+#     num_instances = len(ytest)
+#     one_count = np.count_nonzero(ytest == 1)
+#     three_count = np.count_nonzero(ytest == 3)
+#     five_count = np.count_nonzero(ytest == 5)
+#
+#     print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
+#     print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
+#     print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
+#     print(f"Total: {num_instances}")
+#
+#     print("\n-------------------------------------------------")
+#
+#     counter += 1
 
 
 
