@@ -438,6 +438,7 @@ def run_ensemble_compare(dim, n_CV_splits):
     Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
     train_x = pd.concat([Xtrain, Xtest], ignore_index=True, sort=False)
     train_y = pd.concat([ytrain, ytest], ignore_index=True, sort=False)
+    print(train_x.head(10))
     del Xtrain, Xtest, ytest, ytrain
 
     kf = StratifiedKFold(n_splits=n_CV_splits, shuffle=True, random_state=RANDOM_STATE)
@@ -467,10 +468,11 @@ def plot_ensemble_compare():
     plt.rcParams['figure.figsize'] = [10, 7]
     X = np.arange(3)
     ind = X + 0.15
-    plt.ylim(0.6, 1)
+    plt.ylim(0.2, 1)
     bars = plt.bar(X + 0.00, ensemble['accuracy'], color='royalblue', width=0.3)
-    bars2 = plt.bar(X + 0.00, ensemble['fscore'], color='lightcoral', width=0.3)
+    bars2 = plt.bar(X + 0.3, ensemble['fscore'], color='lightcoral', width=0.3)
 
+    print(ensemble.head(10))
     autolabel(bars, 4)
     autolabel(bars2, 4)
 
@@ -479,7 +481,7 @@ def plot_ensemble_compare():
     plt.title(
         'Comparing Ensemble Classifiers for Doc2Vec150',
         weight='bold', size=14)
-    plt.xticks(ind, ensemble['clfs'], size=10)
+    plt.xticks(ind, ensemble['clf'], size=10)
     plt.legend(('Accuracy', 'F1 Score'), shadow=True, title="Evaluation Metric", title_fontsize=12)
     plt.show()
 
@@ -534,5 +536,5 @@ if __name__ == "__main__":
     # run_adaboost_d2v(300, 5)
     # plot_adaboost_d2v()
 
-    run_ensemble_compare(150, 5)
+    # run_ensemble_compare(150, 5)
     plot_ensemble_compare()
