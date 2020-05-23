@@ -168,7 +168,7 @@ def learning_curve(model):
     return pd.DataFrame(train_eval), pd.DataFrame(test_eval)
 
 
-def gridsearch_linear(param_space, dim, xval_size=5):
+def gridsearch_c(param_space, dim, kernel, xval_size=5):
 
     evaluation = {
         "c": [],
@@ -182,7 +182,7 @@ def gridsearch_linear(param_space, dim, xval_size=5):
         
         print(f"({i}/{len(param_space)}) values searched (C={c}).")
 
-        
+        model = svm.SVC(kernel=kernel, C=c)
 
         fscore = 0
         accuracy = 0
@@ -191,7 +191,59 @@ def gridsearch_linear(param_space, dim, xval_size=5):
         xval_num = 0
         for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
             
-            model = svm.SVC(kernel='linear')
+            xval_num += 1
+            print(f"\t{xval_num}/{xval_size}")
+
+            print("fitting model....")
+            model.fit(Xtrain, ytrain)
+
+            print("predicting....")
+            predictions = model.predict(Xtest)
+
+            print("computing metric....")
+            fscore += metrics.f1_score(ytest, predictions, average='weighted')
+            accuracy += metrics.accuracy_score(ytest, predictions)
+            precision += metrics.precision_score(ytest, predictions, average='weighted')
+            recall += metrics.recall_score(ytest, predictions, average='weighted')
+
+            del Xtrain
+            del Xtest
+            del ytrain
+            del ytest
+
+        with open(f"./results/svm/gridsearch_{kernel}_{dim}.csv", "a") as fp:
+            fp.write(f"{c}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
+
+
+    return pd.DataFrame(evaluation)
+
+def gridsearch_c_coeff(param_space, dim, kernel, xval_size=5):
+
+    evaluation = {
+        "c": [],
+        "coeff": [],
+        "fscore": [], 
+        "accuracy": [], 
+        "precision": [], 
+        "recall": []
+    }
+
+    for i, param in enumerate(param_space):
+        c, coeff = param
+
+
+        print(f"({i}/{len(param_space)}) values searched (C={c}).")
+
+        model = svm.SVC(kernel=kernel, C=c, coef0=coeff)
+
+        fscore = 0
+        accuracy = 0
+        precision = 0
+        recall = 0
+        xval_num = 0
+        for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
+            
+            
 
             xval_num += 1
             print(f"\t{xval_num}/{xval_size}")
@@ -212,24 +264,23 @@ def gridsearch_linear(param_space, dim, xval_size=5):
             del Xtest
             del ytrain
             del ytest
-            del model
 
-        evaluation['c'].append(c)
-        evaluation['fscore'].append(fscore / xval_size)
-        evaluation['accuracy'].append(accuracy / xval_size)
-        evaluation['precision'].append(precision / xval_size)
-        evaluation['recall'].append(precision / xval_size)
+        with open(f"./results/svm/gridsearch_{kernel}_{dim}.csv", "a") as fp:
+            fp.write(f"{c}, {coeff}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
 
 
     return pd.DataFrame(evaluation)
 
+kernel = 'rbf'
+dim = 125
+with open(f"./results/svm/gridsearch_{kernel}_{dim}.csv", "a") as fp:
+    fp.write(f"C, fscore, accuracy, precision, recall\n")
+
+
+gridsearch_c([0.001, 0.01, 0.05, 0.1, 0.5, 1, 1.5, 5, 10], dim=dim, kernel=kernel)
+
+
 """
-result = gridsearch_linear(np.array([10 ** (i) for i in range(0, 5)]), dim=150)
-
-result.to_csv("./results/svm/gridsearch_linear_150.csv")
-"""
-
-
 print("Original Hold Out:")
 
 Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(150)
@@ -261,11 +312,4 @@ for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(150):
     print("\n-------------------------------------------------")
 
     counter += 1
-
-
-
-
-
-
-
-
+"""
