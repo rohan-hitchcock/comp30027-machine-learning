@@ -235,8 +235,8 @@ x_train = train.drop(['rating', 'date', 'review_id', 'reviewer_id', 'business_id
 # np.save('./results/lgr_for_d2v50_vs_kbest_f1.npy', kbest_results_f1)
 
 # Can simply load to produce graph
-kb_results_acc = np.load('./results/lgr_for_d2v50_vs_kbest_acc.npy')
-kb_results_f1 = np.load('./results/lgr_for_d2v50_vs_kbest_f1.npy')
+kb_results_acc = np.load('results/lgr/lgr_for_d2v50_vs_kbest_acc.npy')
+kb_results_f1 = np.load('results/lgr/lgr_for_d2v50_vs_kbest_f1.npy')
 plt.rcParams['figure.figsize'] = [10, 7]
 plt.ylim(0.5, 1)
 plt.plot(range(0, 30), kb_results_acc, 'bo', linestyle='-', label="Accuracy")
