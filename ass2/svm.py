@@ -7,6 +7,7 @@ from collections import namedtuple
 import matplotlib.pyplot as plt
 
 from generate_docvecs import get_dot2vec_split
+from generate_docvecs import get_doc2vec_crossval
 
 Evaluation = namedtuple("Evaluation", ["accuracy", "fscore", "precision", "recall"])
 
@@ -167,62 +168,49 @@ def learning_curve(model):
     return pd.DataFrame(train_eval), pd.DataFrame(test_eval)
 
 
-def learning_curve_for_linear_to_delete(model):
+def gridsearch_linear(param_space, dim, xval_size=5):
 
-
-    test_eval = {
-        "dim": [],
+    evaluation = {
+        "c": [],
         "fscore": [], 
         "accuracy": [], 
         "precision": [], 
         "recall": []
     }
 
-    for dim in range(25, 301, 25):
+    for i, c in enumerate(param_space):
         
-        print(f"dim = {dim}")
+        print(f"({i}/{len(param_space)}) values searched.")
+
+        model = svm.SVC(kernel='linear', C=c)
+
+        fscore = 0
+        accuracy = 0
+        precision = 0
+        recall = 0
+        for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
+
+            model.fit(Xtrain, ytrain)
+
+            predictions = model.predict(Xtest)
+
+            fscore += metrics.f1_score(ytest, predictions, average='weighted')
+            accuracy += metrics.accuracy_score(ytest, predictions)
+            precision += metrics.precision_score(ytest, predictions, average='weighted')
+            recall += metrics.recall_score(ytest, predictions, average='weighted')
+
+        evaluation['c'].append(c)
+        evaluation['fscore'].append(fscore / xval_size)
+        evaluation['accuracy'].append(accuracy / xval_size)
+        evaluation['precision'].append(precision / xval_size)
+        evaluation['recall'].append(precision / xval_size)
 
 
-        test_eval["dim"].append(dim)
-
-        Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
-
-        model.fit(Xtrain, ytrain)
+    return pd.DataFrame(evaluation)
 
 
-        predictions = model.predict(Xtest)
+result = gridsearch_linear(np.array([1.0 ** (i) for i in range(-2, 5)]), dim=150)
 
-        test_eval['fscore'].append(metrics.f1_score(ytest, predictions, average='weighted'))
-        test_eval['accuracy'].append(metrics.accuracy_score(ytest, predictions))
-        test_eval['precision'].append(metrics.precision_score(ytest, predictions, average='weighted'))
-        test_eval['recall'].append(metrics.recall_score(ytest, predictions, average='weighted'))
+result.to_csv("./results/svm/gridsearch_linear_150.csv")
 
-        del Xtrain
-        del Xtest
-        del ytrain
-        del ytest
-
-    return pd.DataFrame(test_eval)
-
-
-
-kernals = ['linear', 'rbf', 'poly', 'sigmoid']
-for kernal in kernals:
-    print(f"kernal = {kernal}")
-    
-    model = svm.SVC(kernel=kernal)
-
-
-    if kernal == 'linear':
-        
-        test_eval = learning_curve_for_linear_to_delete(model)
-
-        test_eval.to_csv(f"results/svm/learning_curve_{kernal}_test.csv")
-
-    else:
-
-        train_eval, test_eval = learning_curve(model)
-
-        train_eval.to_csv(f"results/svm/learning_curve_{kernal}_train.csv")
-        test_eval.to_csv(f"results/svm/learning_curve_{kernal}_test.csv")
 
