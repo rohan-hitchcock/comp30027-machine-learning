@@ -7,7 +7,7 @@ class PolarizedSVM:
     def __init__(self, threshold, middle_class, kernel='linear', C=1.0):
         self.threshold = threshold
         self.middle_class = middle_class
-        self.model = svm.SVC(C=C, kernel=kernel)
+        self.model = svm.SVC(C=C, kernel=kernel, probability=True)
 
 
     def fit(self, X, y):
@@ -17,16 +17,13 @@ class PolarizedSVM:
         X = X[index]
         y = y[index]
 
-        self.model.fit(X, y, probability=True)
+        self.model.fit(X, y)
 
 
     def predict(self, X):
         
 
         probs = self.model.predict_proba(X)
-
-        print(probs)
-        print(self.model.classes_)
         
         predictions = np.empty(len(probs))
 
@@ -41,4 +38,42 @@ class PolarizedSVM:
                 predictions[i] = self.model.classes_[0] if c0_prob > c1_prob else self.model.classes_[1]
 
         return predictions
-        
+
+
+if __name__ == "__main__":
+
+    from generate_docvecs import get_dot2vec_split
+    from sklearn import metrics
+
+    threshold = 0.85
+    middle_class = 3
+    C = 0.001
+
+    dim = 125
+
+
+    print(threshold)
+    model = PolarizedSVM(threshold, middle_class, C=C)
+
+    Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
+
+    model.fit(Xtrain, ytrain)
+
+    predictions = model.predict(Xtest)
+
+
+    fscore = metrics.f1_score(ytest, predictions, average='weighted')
+    accuracy = metrics.accuracy_score(ytest, predictions)
+    precision = metrics.precision_score(ytest, predictions, average='weighted')
+    recall = metrics.recall_score(ytest, predictions, average='weighted')
+
+
+    cm = metrics.confusion_matrix(ytest, predictions, labels=[1, 3, 5], normalize='true')
+
+    print(f"Fscore: {fscore}\n"
+          f"Accuracy: {accuracy}\n"
+          f"Precision: {precision}\n"
+          f"Recall: {recall}")
+
+
+    print(cm)
