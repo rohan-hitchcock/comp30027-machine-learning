@@ -20,6 +20,7 @@ import pandas as pd
 
 from svm import learning_curve
 from generate_docvecs import get_dot2vec_split
+from generate_docvecs import get_doc2vec_crossval
 
 RANDOM_STATE = 7
 CV = 10
@@ -169,7 +170,7 @@ def plot_lgr_C(c_range=np.logspace(-4, 4, 30)):
 # ---------- Selecting K-best CountVec features and adding them to Doc2vec50
 # Asking: Does Doc2Vec encompass the same information CountVec does, or can the best features from CountVec
 # add additional info (and therefore predictive capability) to a model?
-def run_lgr_kbest_countvec_to_d2v(count_vec, d2v50, class_labels, n_CV_splits, feature_names, K=30):
+def run_lgr_kbest_countvec_to_d2v(count_vec, d2v50, class_labels, n_CV_splits, feature_names, K=100):
     kf = StratifiedKFold(n_splits=n_CV_splits, shuffle=True, random_state=RANDOM_STATE)
     lgr = LogisticRegression(max_iter=200)
     avg_acc = []
@@ -380,54 +381,6 @@ def plot_lgr_learning_curve():
     plt.show()
 
 
-# ---------- AdaBoosting Logistic Regression for Doc2Vec
-def run_adaboost_d2v(dim, n_CV_splits):
-    train_eval = {
-        "dim": [],
-        "fscore": [],
-        "accuracy": []
-    }
-    clf = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=RANDOM_STATE)
-    kf = StratifiedKFold(n_splits=n_CV_splits, shuffle=True, random_state=RANDOM_STATE)
-    for d in range(25, dim+1, 25):
-        Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(d)
-        train_x = pd.concat([Xtrain, Xtest], ignore_index=True, sort=False)
-        train_y = pd.concat([ytrain, ytest], ignore_index=True, sort=False)
-        del Xtrain, Xtest, ytest, ytrain
-
-        acc = []
-        fscore = []
-
-        for train, test in kf.split(train_x, train_y):
-            clf.fit(train_x.loc[train], class_labels.loc[train])
-            acc.append(clf.score(train_x.loc[test], train_y.loc[test]))
-            predicted = clf.predict(train_x.loc[test])
-            fscore.append(f1_score(train_y.loc[test], predicted, average='weighted'))
-        train_eval['dim'].append(d)
-        train_eval['accuracy'].append(np.average(fscore))
-        train_eval['fscore'].append(np.average(acc))
-
-    pd.DataFrame(train_eval).to_csv("./results/lgr/adaboost.csv")
-
-
-# ---------- Graph of Above
-def plot_adaboost_d2v():
-    adaboost = pd.read_csv("./results/lgr/adaboost.csv", index_col=0, header=0)
-
-    plt.rcParams['figure.figsize'] = [10, 7]
-    plt.ylim(0.2, 1)
-
-    plt.plot(adaboost['dim'], adaboost['fscore'], 'go', linestyle='-', label="F1 Score")
-    plt.plot(adaboost['dim'], adaboost['accuracy'], 'yo', linestyle='-', label="Accuracy")
-
-    plt.legend(loc='upper left', shadow=True)
-    plt.xlabel("Doc2Vec Dimensionality", size=12)
-    plt.ylabel("Evaluation Value", size=12)
-    plt.title("Adaboost Performance for Logistic Regression vs. Doc2Vec Dimensionality",
-              weight="bold", size=14)
-    plt.show()
-
-
 # ---------- AdaBoost Logistic Regression, Logisitic Regression, and AdaB Decision Tree
 def run_ensemble_compare(dim, n_CV_splits):
     eval_dict = {
@@ -435,13 +388,7 @@ def run_ensemble_compare(dim, n_CV_splits):
         "fscore": [],
         "accuracy": []
     }
-    Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
-    train_x = pd.concat([Xtrain, Xtest], ignore_index=True, sort=False)
-    train_y = pd.concat([ytrain, ytest], ignore_index=True, sort=False)
-    print(train_x.head(10))
-    del Xtrain, Xtest, ytest, ytrain
 
-    kf = StratifiedKFold(n_splits=n_CV_splits, shuffle=True, random_state=RANDOM_STATE)
     ab_lgr = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=RANDOM_STATE)
     ab_dt = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=RANDOM_STATE)
     lgr = LogisticRegression(max_iter=200)
@@ -450,11 +397,14 @@ def run_ensemble_compare(dim, n_CV_splits):
     for name, clf in clfs.items():
         acc = []
         fscore = []
-        for train, test in kf.split(train_x, train_y):
-            clf.fit(train_x.loc[train], class_labels.loc[train])
-            acc.append(clf.score(train_x.loc[test], train_y.loc[test]))
-            predicted = clf.predict(train_x.loc[test])
-            fscore.append(f1_score(train_y.loc[test], predicted, average='weighted'))
+        i=0
+        for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_CV_splits):
+            print(i)
+            i+=1
+            clf.fit(Xtrain, ytrain)
+            acc.append(clf.score(Xtest, ytest))
+            predicted = clf.predict(Xtest)
+            fscore.append(f1_score(ytest, predicted, average='weighted'))
         eval_dict['clf'].append(name)
         eval_dict['accuracy'].append(np.average(fscore))
         eval_dict['fscore'].append(np.average(acc))
@@ -536,5 +486,5 @@ if __name__ == "__main__":
     # run_adaboost_d2v(300, 5)
     # plot_adaboost_d2v()
 
-    # run_ensemble_compare(150, 5)
+    run_ensemble_compare(150, 5)
     plot_ensemble_compare()
