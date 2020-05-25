@@ -1,0 +1,59 @@
+\documentclass[11pt]{article}
+\usepackage{colacl}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[dvipsnames]{xcolor}
+\sloppy
+
+%used for identifying drafting or notes
+\newcommand{\drafting}[1]{\textcolor{OliveGreen}{#1}}
+
+\title{Paper Template for COMP30027 Report}
+\author
+{Anonymous}
+
+
+
+\begin{document}
+\maketitle
+
+
+%\begin{abstract}
+%Don't include an abstract.
+%\end{abstract}
+
+\section{Introduction}
+\drafting{
+Introduction goes here.
+}
+
+\section{Support vector machine approaches}
+\drafting{
+SVM stuff goes here
+}
+
+\section{Ensemble approach}
+
+\drafting{
+Ensemble (stacking) stuff goes here
+}
+
+\section{Conclusions}
+
+\drafting{
+	conclusion
+}
+
+%put any citations here which must be included in the bibliography but won't necessarily be referenced
+
+%citations for the dataset
+\nocite{mukherjee_what_2013}
+\nocite{rayana_collective_2015}
+
+%citations for software libraries
+\nocite{sklearn_pedregosa_scikit-learn_2011}
+\nocite{gensim_rehurek_software_2010}
+\bibliographystyle{acl}
+\bibliography{report}
+
+\end{document}
