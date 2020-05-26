@@ -282,10 +282,10 @@ def gridsearch_c_gamma(param_space, dim, kernel, xval_size=5):
             fp.write(f"{c}, {gamma}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
 
 
-dim = 125
-kernel = 'rbf'
-param_space = list(itertools.product([1.75, 2, 2.25], [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]))
-gridsearch_c_gamma(param_space, dim, kernel)
+# dim = 125
+# kernel = 'rbf'
+# param_space = list(itertools.product([1.75, 2, 2.25], [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]))
+# gridsearch_c_gamma(param_space, dim, kernel)
 
 """
 param_space = list(itertools.product([0.0005, 0.001, 0.0015, 0.002], [0.95]))

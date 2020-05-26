@@ -22,6 +22,7 @@ import pandas as pd
 from svm import learning_curve
 from generate_docvecs import get_dot2vec_split
 from generate_docvecs import get_doc2vec_crossval
+from plotting import gridsearch_heatmap
 
 RANDOM_STATE = 7
 CV = 10
@@ -390,10 +391,10 @@ def run_ensemble_compare(dim, n_CV_splits):
         "accuracy": []
     }
 
-    ab_lgr = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=RANDOM_STATE)
+    ab_lgr = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200, C=0.015), random_state=RANDOM_STATE)
     ab_dt = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=10), random_state=RANDOM_STATE)
-    lgr = LogisticRegression(max_iter=200, random_state=RANDOM_STATE)
-    bc_lgr = BaggingClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=RANDOM_STATE)
+    lgr = LogisticRegression(max_iter=200, random_state=RANDOM_STATE, C=0.015)
+    bc_lgr = BaggingClassifier(base_estimator=LogisticRegression(max_iter=200, C=0.015), random_state=RANDOM_STATE)
 
     clfs = {"Adaboost LogReg": ab_lgr, "Adaboost Decision Tree": ab_dt, "Logisitc Regression": lgr, "Bagging LogReg": bc_lgr}
 
@@ -450,8 +451,8 @@ def run_bagging(dim, n_CV_splits):
     fscore_bc = []
     fscore_lgr = []
     for ran_state in range(10):
-        lgr = LogisticRegression(max_iter=200, random_state=ran_state)
-        bc_lgr = BaggingClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=ran_state)
+        lgr = LogisticRegression(max_iter=200, random_state=ran_state, C=0.015)
+        bc_lgr = BaggingClassifier(base_estimator=LogisticRegression(max_iter=200, C=0.015), random_state=ran_state)
 
         clfs = {"Logisitc Regression": lgr,
                 "Bagging LogReg": bc_lgr}
@@ -557,6 +558,66 @@ def plot_adaboost():
     plt.legend(('Accuracy', 'F1 Score'), shadow=True, title="Evaluation Metric", title_fontsize=12)
     plt.show()
 
+
+# ---------- GridSearch C Hyperparameter
+def gridsearch_c(param_space, dim, xval_size=5):
+    for i, c in enumerate(param_space):
+
+        print(f"({i}/{len(param_space)}) values searched (C={c}).")
+
+        model = LogisticRegression(max_iter=200, C=c)
+
+        fscore = 0
+        accuracy = 0
+        precision = 0
+        recall = 0
+        xval_num = 0
+        for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
+            xval_num += 1
+            print(f"\t{xval_num}/{xval_size}")
+
+            print("fitting model....")
+            model.fit(Xtrain, ytrain)
+
+            print("predicting....")
+            predictions = model.predict(Xtest)
+
+            print("computing metric....")
+            fscore += metrics.f1_score(ytest, predictions, average='weighted')
+            accuracy += metrics.accuracy_score(ytest, predictions)
+            precision += metrics.precision_score(ytest, predictions, average='weighted')
+            recall += metrics.recall_score(ytest, predictions, average='weighted')
+
+            del Xtrain
+            del Xtest
+            del ytrain
+            del ytest
+
+        with open(f"./results/lgr/gridsearch_{dim}.csv", "a") as fp:
+            fp.write(
+                f"{c}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
+
+
+# ---------- Graph for above
+def plot_gridsearch_c(dim):
+    gridsearch = pd.read_csv(f"./results/lgr/gridsearch_{dim}.csv", sep=', ', names=['C', 'fscore', 'accuracy','precision','recall'])
+    print(gridsearch.head(10))
+    plt.rcParams['figure.figsize'] = [10, 7]
+    plt.xscale('log')
+    plt.ylim(0.75, 0.9)
+
+    plt.plot(gridsearch['C'], gridsearch['fscore'], 'go', linestyle='-', label="F1 Score")
+    plt.plot(gridsearch['C'], gridsearch['accuracy'], 'yo', linestyle='-', label="Accuracy")
+
+
+    plt.legend(loc='upper left', shadow=True)
+    plt.xlabel("C Hyperparameter", size=12)
+    plt.ylabel("Evaluation Value", size=12)
+    plt.title("Logistic Regression for Doc2Vec150 vs C Hyperparameter",
+              weight="bold", size=14)
+    plt.show()
+
+
 if __name__ == "__main__":
     # Meta adaboosting data
     train_set = pd.read_csv(r"./datasets/review_meta_train.csv")
@@ -606,8 +667,12 @@ if __name__ == "__main__":
     # run_ensemble_compare(150, 5)
     # plot_ensemble_compare()
 
-    # run_bagging(150, 5)
-    # plot_bagging()
+    run_bagging(150, 5)
+    plot_bagging()
 
     # run_adaboost(150, 5)
     # plot_adaboost()
+
+    # param_space = [0.0001, 0.001, 0.01, 0.015, 0.02, 0.05, 0.08, 0.1, 1, 10]
+    # gridsearch_c(param_space, 150, xval_size=5)
+    # plot_gridsearch_c(150)
