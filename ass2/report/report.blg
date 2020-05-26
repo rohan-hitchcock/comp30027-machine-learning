@@ -3,46 +3,49 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: report.aux
 The style file: acl.bst
 Database file #1: report.bib
+Warning--empty journal in koppel_importance_2006
+Warning--empty journal in le_distributed_2014
 Warning--empty journal in sklearn_pedregosa_scikit-learn_2011
-You've used 4 entries,
+Warning--empty journal in platt_probabilistic_1999
+You've used 7 entries,
             2490 wiz_defined-function locations,
-            575 strings with 5476 characters,
-and the built_in function-call counts, 2298 in all, are:
-= -- 225
-> -- 132
+            592 strings with 5898 characters,
+and the built_in function-call counts, 3357 in all, are:
+= -- 340
+> -- 165
 < -- 2
-+ -- 48
-- -- 48
-* -- 182
-:= -- 373
-add.period$ -- 17
-call.type$ -- 4
-change.case$ -- 40
-chr.to.int$ -- 4
-cite$ -- 5
-duplicate$ -- 85
-empty$ -- 152
-format.name$ -- 54
-if$ -- 474
++ -- 58
+- -- 58
+* -- 264
+:= -- 545
+add.period$ -- 29
+call.type$ -- 7
+change.case$ -- 57
+chr.to.int$ -- 7
+cite$ -- 11
+duplicate$ -- 129
+empty$ -- 233
+format.name$ -- 69
+if$ -- 686
 int.to.chr$ -- 1
 int.to.str$ -- 0
-missing$ -- 4
-newline$ -- 27
-num.names$ -- 12
-pop$ -- 49
+missing$ -- 7
+newline$ -- 45
+num.names$ -- 21
+pop$ -- 67
 preamble$ -- 1
-purify$ -- 44
+purify$ -- 64
 quote$ -- 0
-skip$ -- 66
+skip$ -- 101
 stack$ -- 0
-substring$ -- 107
-swap$ -- 26
+substring$ -- 166
+swap$ -- 29
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 32
-warning$ -- 1
-while$ -- 16
-width$ -- 8
-write$ -- 57
-(There was 1 warning)
+type$ -- 56
+warning$ -- 4
+while$ -- 26
+width$ -- 11
+write$ -- 96
+(There were 4 warnings)

@@ -284,14 +284,14 @@ def gridsearch_c_gamma(param_space, dim, kernel, xval_size=5):
 
 dim = 125
 kernel = 'rbf'
-param_space = list(itertools.product([1.75, 2, 2.25], [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]))
+param_space = list(itertools.product([1, 1.25], [0.2, 0.1]))
 gridsearch_c_gamma(param_space, dim, kernel)
 
 """
 param_space = list(itertools.product([0.0005, 0.001, 0.0015, 0.002], [0.95]))
 
 param_space = list(itertools.product([0.0005, 0.001, 0.0015, 0.002], [0.95]))
-gridsearch_polar(param_space, dim)
+gridsearch_polar(pa am_space, dim)
 
 
 param_space = list(itertools.product([0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005], [0.7, 0.75, 0.8, 0.85, 0.9, 0.95]))

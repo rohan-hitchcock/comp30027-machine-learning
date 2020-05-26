@@ -1,5 +1,17 @@
 \begin{thebibliography}{}
 
+\bibitem[\protect\citename{Koppel and Schler}2006]{koppel_importance_2006}
+Moshe Koppel and Jonathan Schler.
+\newblock 2006.
+\newblock {THE} {IMPORTANCE} {OF} {NEUTRAL} {EXAMPLES} {FOR} {LEARNING}
+  {SENTIMENT}.
+\newblock 22(2):100--109.
+
+\bibitem[\protect\citename{Le and Mikolov}2014]{le_distributed_2014}
+Quoc~V. Le and Tomas Mikolov.
+\newblock 2014.
+\newblock Distributed representations of sentences and documents.
+
 \bibitem[\protect\citename{Mukherjee \bgroup et al.\egroup
   }2013]{mukherjee_what_2013}
 Arjun Mukherjee, Vivek Venkataraman, Bing Liu, and Natalie Glance.
@@ -16,6 +28,14 @@ F.~Pedregosa, G.~Varoquaux, A.~Gramfort, V.~Michel, B.~Thirion, O.~Grisel,
 \newblock 2011.
 \newblock Scikit-learn: Machine learning in python.
 \newblock 12:2825--2830.
+
+\bibitem[\protect\citename{Platt}1999]{platt_probabilistic_1999}
+John Platt.
+\newblock 1999.
+\newblock Probabilistic outputs for support vector machines and comparisons to
+  regularized likelihood methods.
+\newblock 10(3):61--74.
+\newblock Publisher: Cambridge, {MA}.
 
 \bibitem[\protect\citename{Rayana and Akoglu}2015]{rayana_collective_2015}
 Shebuti Rayana and Leman Akoglu.
