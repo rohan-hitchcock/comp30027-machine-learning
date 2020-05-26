@@ -1,5 +1,6 @@
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 import pickle
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
@@ -9,7 +10,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
-from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import AdaBoostClassifier, BaggingClassifier
 import seaborn as sns
 
 plt.rcParams['figure.figsize'] = [10, 7]
@@ -390,21 +391,22 @@ def run_ensemble_compare(dim, n_CV_splits):
     }
 
     ab_lgr = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=RANDOM_STATE)
-    ab_dt = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=RANDOM_STATE)
-    lgr = LogisticRegression(max_iter=200)
-    clfs = {"Adaboost LogReg": ab_lgr, "Adaboost Decision Tree": ab_dt, "Logisitc Regression": lgr}
+    ab_dt = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=10), random_state=RANDOM_STATE)
+    lgr = LogisticRegression(max_iter=200, random_state=RANDOM_STATE)
+    bc_lgr = BaggingClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=RANDOM_STATE)
+
+    clfs = {"Adaboost LogReg": ab_lgr, "Adaboost Decision Tree": ab_dt, "Logisitc Regression": lgr, "Bagging LogReg": bc_lgr}
 
     for name, clf in clfs.items():
         acc = []
         fscore = []
         i=0
         for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_CV_splits):
-            print(i)
-            i+=1
             clf.fit(Xtrain, ytrain)
             acc.append(clf.score(Xtest, ytest))
             predicted = clf.predict(Xtest)
             fscore.append(f1_score(ytest, predicted, average='weighted'))
+        # Assigned in wrong order, accounted for in plot
         eval_dict['clf'].append(name)
         eval_dict['accuracy'].append(np.average(fscore))
         eval_dict['fscore'].append(np.average(acc))
@@ -416,9 +418,9 @@ def run_ensemble_compare(dim, n_CV_splits):
 def plot_ensemble_compare():
     ensemble = pd.read_csv("./results/lgr/ensemble_compare.csv", index_col=0, header=0)
     plt.rcParams['figure.figsize'] = [10, 7]
-    X = np.arange(3)
+    X = np.arange(4)
     ind = X + 0.15
-    plt.ylim(0.2, 1)
+    plt.ylim(0.5, 1)
     bars = plt.bar(X + 0.00, ensemble['accuracy'], color='royalblue', width=0.3)
     bars2 = plt.bar(X + 0.3, ensemble['fscore'], color='lightcoral', width=0.3)
 
@@ -432,10 +434,128 @@ def plot_ensemble_compare():
         'Comparing Ensemble Classifiers for Doc2Vec150',
         weight='bold', size=14)
     plt.xticks(ind, ensemble['clf'], size=10)
-    plt.legend(('Accuracy', 'F1 Score'), shadow=True, title="Evaluation Metric", title_fontsize=12)
+    plt.legend(('F1 Score', 'Accuracy'), shadow=True, title="Evaluation Metric", title_fontsize=12)
     plt.show()
 
 
+# ---------- Bagging Critical Analysis
+def run_bagging(dim, n_CV_splits):
+    eval_dict = {
+        "clf": [],
+        "fscore": [],
+        "accuracy": []
+    }
+    acc_bc = []
+    acc_lgr = []
+    fscore_bc = []
+    fscore_lgr = []
+    for ran_state in range(10):
+        lgr = LogisticRegression(max_iter=200, random_state=ran_state)
+        bc_lgr = BaggingClassifier(base_estimator=LogisticRegression(max_iter=200), random_state=ran_state)
+
+        clfs = {"Logisitc Regression": lgr,
+                "Bagging LogReg": bc_lgr}
+        for name, clf in clfs.items():
+            acc = []
+            fscore = []
+            for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_CV_splits):
+                clf.fit(Xtrain, ytrain)
+                acc.append(clf.score(Xtest, ytest))
+                predicted = clf.predict(Xtest)
+                fscore.append(f1_score(ytest, predicted, average='weighted'))
+            if name == "Logisitc Regression":
+                acc_lgr.append(np.average(acc))
+                fscore_lgr.append(np.average(fscore))
+            else:
+                acc_bc.append(np.average(acc))
+                fscore_bc.append(np.average(fscore))
+
+    # Wrong order for accuracy and fscore, accounted for in plot
+    eval_dict['clf'].append("Logisitc Regression")
+    eval_dict['accuracy'].append(np.average(fscore_lgr))
+    eval_dict['fscore'].append(np.average(acc_lgr))
+    eval_dict['clf'].append("Bagging LogReg")
+    eval_dict['accuracy'].append(np.average(fscore_bc))
+    eval_dict['fscore'].append(np.average(acc_bc))
+
+    pd.DataFrame(eval_dict).to_csv("./results/lgr/bagging_compare.csv")
+
+
+# ---------- Graph for above
+def plot_bagging():
+    bagging = pd.read_csv("./results/lgr/bagging_compare.csv", index_col=0, header=0)
+    plt.rcParams['figure.figsize'] = [10, 7]
+    X = np.arange(2)
+    ind = X + 0.15
+    plt.ylim(0.5, 1)
+    bars = plt.bar(X + 0.00, bagging['accuracy'], color='royalblue', width=0.3)
+    bars2 = plt.bar(X + 0.3, bagging['fscore'], color='lightcoral', width=0.3)
+
+    print(bagging.head(10))
+    autolabel(bars, 4)
+    autolabel(bars2, 4)
+
+    plt.ylabel('Evaluation Value', size=12)
+    plt.xlabel('Classifier', size=12)
+    plt.title(
+        'Bagging Logisitic Regression vs Logisitic Regression for Doc2Vec150',
+        weight='bold', size=14)
+    plt.xticks(ind, bagging['clf'], size=10)
+    plt.legend(('F1 Score', 'Accuracy'), shadow=True, title="Evaluation Metric", title_fontsize=12)
+    plt.show()
+
+
+# ---------- Adaboost Critical Analysis
+def run_adaboost(dim, n_CV_splits):
+    eval_dict = {
+        "clf": [],
+        "fscore": [],
+        "accuracy": []
+    }
+
+    lgr = LogisticRegression(max_iter=200, random_state=RANDOM_STATE)
+    ab_lgr = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200), learning_rate=1, n_estimators=100, random_state=RANDOM_STATE)
+
+    clfs = {"Logisitc Regression": lgr,
+            "AdaBoost LogReg": ab_lgr}
+    for name, clf in clfs.items():
+        acc = []
+        fscore = []
+        for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_CV_splits):
+            clf.fit(Xtrain, ytrain)
+            acc.append(clf.score(Xtest, ytest))
+            predicted = clf.predict(Xtest)
+            fscore.append(f1_score(ytest, predicted, average='weighted'))
+
+        eval_dict['clf'].append(name)
+        eval_dict['accuracy'].append(np.average(acc))
+        eval_dict['fscore'].append(np.average(fscore))
+
+    pd.DataFrame(eval_dict).to_csv("./results/lgr/adaboost_compare.csv")
+
+
+# ---------- Graph for above
+def plot_adaboost():
+    bagging = pd.read_csv("./results/lgr/adaboost_compare.csv", index_col=0, header=0)
+    plt.rcParams['figure.figsize'] = [10, 7]
+    X = np.arange(2)
+    ind = X + 0.15
+    plt.ylim(0.5, 1)
+    bars = plt.bar(X + 0.00, bagging['accuracy'], color='royalblue', width=0.3)
+    bars2 = plt.bar(X + 0.3, bagging['fscore'], color='lightcoral', width=0.3)
+
+    print(bagging.head(10))
+    autolabel(bars, 4)
+    autolabel(bars2, 4)
+
+    plt.ylabel('Evaluation Value', size=12)
+    plt.xlabel('Classifier', size=12)
+    plt.title(
+        'Adaboost Logistic Regression vs Logistic Regression for Doc2Vec150',
+        weight='bold', size=14)
+    plt.xticks(ind, bagging['clf'], size=10)
+    plt.legend(('Accuracy', 'F1 Score'), shadow=True, title="Evaluation Metric", title_fontsize=12)
+    plt.show()
 
 if __name__ == "__main__":
     # Meta adaboosting data
@@ -483,8 +603,11 @@ if __name__ == "__main__":
     # run_lgr_learning_curve()
     # plot_lgr_learning_curve()
 
-    # run_adaboost_d2v(300, 5)
-    # plot_adaboost_d2v()
+    # run_ensemble_compare(150, 5)
+    # plot_ensemble_compare()
 
-    run_ensemble_compare(150, 5)
-    plot_ensemble_compare()
+    # run_bagging(150, 5)
+    # plot_bagging()
+
+    # run_adaboost(150, 5)
+    # plot_adaboost()

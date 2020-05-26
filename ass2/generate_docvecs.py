@@ -31,10 +31,10 @@ def get_doc2vec_crossval(dim, n_splits=5):
 
         Xtrain = pd.read_csv(f"{split_dir}/Xtrain{i}.csv", index_col=0)
         Xtest = pd.read_csv(f"{split_dir}/Xtest{i}.csv", index_col=0)
-        ytest = pd.read_csv(f"{split_dir}/ytest{i}.csv", header=None)
-        ytrain = pd.read_csv(f"{split_dir}/ytrain{i}.csv", header=None)
+        ytest = pd.read_csv(f"{split_dir}/ytest{i}.csv", index_col=0)
+        ytrain = pd.read_csv(f"{split_dir}/ytrain{i}.csv", index_col=0)
 
-        yield Xtrain, Xtest, ytrain[1], ytest[1]
+        yield Xtrain, Xtest, ytrain, ytest
 
 # function to preprocess and tokenize text
 def tokenize_corpus(txt, tokens_only=False):
