@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: report.aux
+The style file: acl.bst
+Database file #1: report.bib
+Warning--empty journal in sklearn_pedregosa_scikit-learn_2011
+You've used 4 entries,
+            2490 wiz_defined-function locations,
+            575 strings with 5476 characters,
+and the built_in function-call counts, 2298 in all, are:
+= -- 225
+> -- 132
+< -- 2
++ -- 48
+- -- 48
+* -- 182
+:= -- 373
+add.period$ -- 17
+call.type$ -- 4
+change.case$ -- 40
+chr.to.int$ -- 4
+cite$ -- 5
+duplicate$ -- 85
+empty$ -- 152
+format.name$ -- 54
+if$ -- 474
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 4
+newline$ -- 27
+num.names$ -- 12
+pop$ -- 49
+preamble$ -- 1
+purify$ -- 44
+quote$ -- 0
+skip$ -- 66
+stack$ -- 0
+substring$ -- 107
+swap$ -- 26
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 32
+warning$ -- 1
+while$ -- 16
+width$ -- 8
+write$ -- 57
+(There was 1 warning)

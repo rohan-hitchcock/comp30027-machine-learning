@@ -5,7 +5,9 @@ import numpy as np
 import pandas as pd
 from collections import namedtuple
 import matplotlib.pyplot as plt
+import itertools
 
+from polarized_svm import PolarizedSVM
 from generate_docvecs import get_dot2vec_split
 from generate_docvecs import get_doc2vec_crossval
 
@@ -114,73 +116,133 @@ def compute_class_proportions():
 
         print("-------------------")
 
-def learning_curve(model):
+def learning_curve(model, fname_test, fname_train):
 
 
-    test_eval = {
-        "dim": [],
-        "fscore": [], 
-        "accuracy": [], 
-        "precision": [], 
-        "recall": []
-    }
+    with open(fname_test, "a") as fp:
+        fp.write("dim, fscore, accuracy, precision, recall\n" )
 
-    train_eval = {
-        "dim": [],
-        "fscore": [], 
-        "accuracy": [], 
-        "precision": [], 
-        "recall": []
-    }
+    with open(fname_train, "a") as fp:
+        fp.write("dim, fscore, accuracy, precision, recall\n" )
+
 
     for dim in range(25, 301, 25):
         
         print(f"dim = {dim}")
 
-
-        test_eval["dim"].append(dim)
-        train_eval["dim"].append(dim)
-
         Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
 
         model.fit(Xtrain, ytrain)
 
-
         predictions = model.predict(Xtest)
 
-        test_eval['fscore'].append(metrics.f1_score(ytest, predictions, average='weighted'))
-        test_eval['accuracy'].append(metrics.accuracy_score(ytest, predictions))
-        test_eval['precision'].append(metrics.precision_score(ytest, predictions, average='weighted'))
-        test_eval['recall'].append(metrics.recall_score(ytest, predictions, average='weighted'))
+        fscore = metrics.f1_score(ytest, predictions, average='weighted')
+        accuracy = metrics.accuracy_score(ytest, predictions)
+        precision = metrics.precision_score(ytest, predictions, average='weighted')
+        recall =  metrics.recall_score(ytest, predictions, average='weighted')
+
+        with open(fname_test, 'a') as fp:
+            fp.write(f"{dim}, {fscore}, {accuracy}, {precision}, {recall}\n")
 
         predictions = model.predict(Xtrain)
 
-        train_eval['fscore'].append(metrics.f1_score(ytrain, predictions, average='weighted'))
-        train_eval['accuracy'].append(metrics.accuracy_score(ytrain, predictions))
-        train_eval['precision'].append(metrics.precision_score(ytrain, predictions, average='weighted'))
-        train_eval['recall'].append(metrics.recall_score(ytrain, predictions, average='weighted'))
+        fscore = metrics.f1_score(ytrain, predictions, average='weighted')
+        accuracy = metrics.accuracy_score(ytrain, predictions)
+        precision = metrics.precision_score(ytrain, predictions, average='weighted')
+        recall = metrics.recall_score(ytrain, predictions, average='weighted')
+
+        with open(fname_train, 'a') as fp:
+            fp.write(f"{dim}, {fscore}, {accuracy}, {precision}, {recall}\n")
 
         del Xtrain
         del Xtest
         del ytrain
         del ytest
 
-    return pd.DataFrame(train_eval), pd.DataFrame(test_eval)
 
 
-def gridsearch_linear(param_space, dim, xval_size=5):
-
-    evaluation = {
-        "c": [],
-        "fscore": [], 
-        "accuracy": [], 
-        "precision": [], 
-        "recall": []
-    }
+def gridsearch_c(param_space, dim, kernel, xval_size=5):
 
     for i, c in enumerate(param_space):
         
         print(f"({i}/{len(param_space)}) values searched (C={c}).")
+
+        model = svm.SVC(kernel=kernel, C=c)
+
+        fscore = 0
+        accuracy = 0
+        precision = 0
+        recall = 0
+        xval_num = 0
+        for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
+            
+            xval_num += 1
+            print(f"\t{xval_num}/{xval_size}")
+
+            print("fitting model....")
+            model.fit(Xtrain, ytrain)
+
+            print("predicting....")
+            predictions = model.predict(Xtest)
+
+            print("computing metric....")
+            fscore += metrics.f1_score(ytest, predictions, average='weighted')
+            accuracy += metrics.accuracy_score(ytest, predictions)
+            precision += metrics.precision_score(ytest, predictions, average='weighted')
+            recall += metrics.recall_score(ytest, predictions, average='weighted')
+
+            del Xtrain
+            del Xtest
+            del ytrain
+            del ytest
+
+        with open(f"./results/svm/gridsearch_{kernel}_{dim}.csv", "a") as fp:
+            fp.write(f"{c}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
+
+
+def gridsearch_polar(param_space, dim, xval_size=5):
+
+    for i, param in enumerate(param_space):
+        c, pthresh = param
+        print(f"({i}/{len(param_space)}) values searched (C={c}, pthresh={pthresh}).")
+
+        model = PolarizedSVM(pthresh, 3, C=c)
+
+        fscore = 0
+        accuracy = 0
+        precision = 0
+        recall = 0
+        xval_num = 0
+        for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
+            
+            xval_num += 1
+            print(f"\t{xval_num}/{xval_size}")
+
+            print("fitting model....")
+            model.fit(Xtrain, ytrain)
+
+            print("predicting....")
+            predictions = model.predict(Xtest)
+
+            print("computing metric....")
+            fscore += metrics.f1_score(ytest, predictions, average='weighted')
+            accuracy += metrics.accuracy_score(ytest, predictions)
+            precision += metrics.precision_score(ytest, predictions, average='weighted')
+            recall += metrics.recall_score(ytest, predictions, average='weighted')
+
+            del Xtrain
+            del Xtest
+            del ytrain
+            del ytest
+
+        with open(f"./results/svm/gridsearch_polar_{dim}.csv", "a") as fp:
+            fp.write(f"{c}, {pthresh}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
+
+def gridsearch_c_gamma(param_space, dim, kernel, xval_size=5):
+
+    for i, param in enumerate(param_space):
+        c, gamma = param
+        print(f"({i}/{len(param_space)}) values searched (C={c}). gamma={gamma}")
 
         
 
@@ -191,7 +253,10 @@ def gridsearch_linear(param_space, dim, xval_size=5):
         xval_num = 0
         for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
             
-            model = svm.SVC(kernel='linear')
+            true_gamma = gamma / (np.array(Xtrain).var() * len(Xtrain.columns))
+
+            model = svm.SVC(kernel=kernel, C=c, gamma=true_gamma)
+
 
             xval_num += 1
             print(f"\t{xval_num}/{xval_size}")
@@ -212,60 +277,58 @@ def gridsearch_linear(param_space, dim, xval_size=5):
             del Xtest
             del ytrain
             del ytest
-            del model
 
-        evaluation['c'].append(c)
-        evaluation['fscore'].append(fscore / xval_size)
-        evaluation['accuracy'].append(accuracy / xval_size)
-        evaluation['precision'].append(precision / xval_size)
-        evaluation['recall'].append(precision / xval_size)
+        with open(f"./results/svm/gridsearch_{kernel}_{dim}.csv", "a") as fp:
+            fp.write(f"{c}, {gamma}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
 
 
-    return pd.DataFrame(evaluation)
+dim = 125
+kernel = 'rbf'
+param_space = list(itertools.product([1.75, 2, 2.25], [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]))
+gridsearch_c_gamma(param_space, dim, kernel)
 
 """
-result = gridsearch_linear(np.array([10 ** (i) for i in range(0, 5)]), dim=150)
+param_space = list(itertools.product([0.0005, 0.001, 0.0015, 0.002], [0.95]))
 
-result.to_csv("./results/svm/gridsearch_linear_150.csv")
+param_space = list(itertools.product([0.0005, 0.001, 0.0015, 0.002], [0.95]))
+gridsearch_polar(param_space, dim)
+
+
+param_space = list(itertools.product([0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005], [0.7, 0.75, 0.8, 0.85, 0.9, 0.95]))
+gridsearch_polar(param_space, dim)
 """
 
+"""
+print("Original Hold Out:")
 
-# print("Original Hold Out:")
-#
-# Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(150)
-# print(Xtrain.head(10))
-# print(ytrain.head(10))
-#
-# print(f"Xtrain count: {len(Xtrain)}")
-# print("\n-------------------------------------------------")
-#
-# counter = 1
-# for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(150):
-#     print(f"Cross val {counter}:")
-#     print(Xtrain.head(10))
-#     print(ytrain.head(10))
-#
-#     print(f"Xtrain count: {len(Xtrain)}")
-#
-#
-#     num_instances = len(ytest)
-#     one_count = np.count_nonzero(ytest == 1)
-#     three_count = np.count_nonzero(ytest == 3)
-#     five_count = np.count_nonzero(ytest == 5)
-#
-#     print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
-#     print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
-#     print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
-#     print(f"Total: {num_instances}")
-#
-#     print("\n-------------------------------------------------")
-#
-#     counter += 1
+Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(150)
+print(Xtrain.head(10))
+print(ytrain.head(10))
+
+print(f"Xtrain count: {len(Xtrain)}")
+print("\n-------------------------------------------------")
+
+counter = 1
+for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(150):
+    print(f"Cross val {counter}:")
+    print(Xtrain.head(10))
+    print(ytrain.head(10))
+
+    print(f"Xtrain count: {len(Xtrain)}")
 
 
+    num_instances = len(ytest)
+    one_count = np.count_nonzero(ytest == 1)
+    three_count = np.count_nonzero(ytest == 3)
+    five_count = np.count_nonzero(ytest == 5)
 
+    print(f"Count of 1: {one_count} ({round(100 * one_count / num_instances, 3)} pc)")
+    print(f"Count of 3: {three_count} ({round(100 * three_count / num_instances, 3)} pc)")
+    print(f"Count of 5: {five_count} ({round(100 * five_count / num_instances, 3)} pc)")
+    print(f"Total: {num_instances}")
 
+    print("\n-------------------------------------------------")
 
-
-
+    counter += 1
+"""
 

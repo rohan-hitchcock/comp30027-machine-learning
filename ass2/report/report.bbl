@@ -1,0 +1,36 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citename{Mukherjee \bgroup et al.\egroup
+  }2013]{mukherjee_what_2013}
+Arjun Mukherjee, Vivek Venkataraman, Bing Liu, and Natalie Glance.
+\newblock 2013.
+\newblock What yelp fake review filter might be doing?
+\newblock In {\em 7th International {AAAI} Conference on Weblogs and Social
+  Media}.
+
+\bibitem[\protect\citename{Pedregosa \bgroup et al.\egroup
+  }2011]{sklearn_pedregosa_scikit-learn_2011}
+F.~Pedregosa, G.~Varoquaux, A.~Gramfort, V.~Michel, B.~Thirion, O.~Grisel,
+  M.~Blondel, P.~Prettenhofer, R.~Weiss, V.~Dubourg, J.~Vanderplas, A.~Passos,
+  D.~Cournapeau, M.~Brucher, M.~Perrot, and E.~Duchesnay.
+\newblock 2011.
+\newblock Scikit-learn: Machine learning in python.
+\newblock 12:2825--2830.
+
+\bibitem[\protect\citename{Rayana and Akoglu}2015]{rayana_collective_2015}
+Shebuti Rayana and Leman Akoglu.
+\newblock 2015.
+\newblock Collective opinion spam detection: Bridging review networks and
+  metadata.
+\newblock In {\em Proceedings of the 21th {ACM} {SIGKDD} International
+  Conference on Knowledge Discovery and Data Mining}, pages 985--994.
+
+\bibitem[\protect\citename{Řehůřek and
+  Sojka}2010]{gensim_rehurek_software_2010}
+Radim Řehůřek and Petr Sojka.
+\newblock 2010.
+\newblock Software framework for topic modelling with large corpora.
+\newblock In {\em Proceedings of the {LREC} 2010 Workshop on New Challenges for
+  {NLP} Frameworks}, pages 45--50. {ELRA}.
+
+\end{thebibliography}
