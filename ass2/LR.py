@@ -129,44 +129,44 @@ def plot_dimensionality_comparison():
     plt.legend(('Accuracy', 'F1 Score'), shadow=True, title="Evaluation Metric", title_fontsize=12)
     plt.show()
 
-
-# ---------- Varying C parameter of logistic Regression for doc2vec50
-def run_lgr_C(dataset, class_labels, n_CV_splits, c_range=np.logspace(-4, 4, 30)):
-    kf = StratifiedKFold(n_splits=n_CV_splits, shuffle=True, random_state=RANDOM_STATE)
-    c_acc = []
-    c_f1_scores = []
-    for c in c_range:
-        lgr = LogisticRegression(C=c)
-        acc_50 = []
-        f1_scores_50 = []
-        for train, test in kf.split(dataset, class_labels):
-            lgr.fit(dataset.loc[train], class_labels.loc[train])
-            acc_50.append(lgr.score(dataset.loc[test], class_labels.loc[test]))
-            predicted = lgr.predict(dataset.loc[test])
-            f1_scores_50.append(f1_score(class_labels.loc[test], predicted, average='weighted'))
-        c_acc.append(np.average(acc_50))
-        c_f1_scores.append(np.average(f1_scores_50))
-
-    c_results_acc = np.array(c_acc)
-    c_results_f1 = np.array(c_f1_scores)
-    np.save('./results/lgr/lgr_for_d2v50_vs_C_acc.npy', c_results_acc)
-    np.save('./results/lgr/lgr_for_d2v50_vs_C_f1.npy', c_results_f1)
-
-
-# ---------- Graph for above
-def plot_lgr_C(c_range=np.logspace(-4, 4, 30)):
-    c_results_acc = np.load('./results/lgr/lgr_for_d2v50_vs_C_acc.npy')
-    c_results_f1 = np.load('./results/lgr/lgr_for_d2v50_vs_C_f1.npy')
-    plt.rcParams['figure.figsize'] = [10, 7]
-    plt.xscale('log')
-    plt.ylim(0.5, 1)
-    plt.plot(c_range, c_results_acc, 'bo', linestyle='-', label="Accuracy")
-    plt.plot(c_range, c_results_f1, 'ro', linestyle='-', label="F1 Score")
-    plt.legend(loc='upper left', shadow=True, title="Evaluation Metric", title_fontsize=12)
-    plt.xlabel("C Value", size=12)
-    plt.ylabel("Evaluation Value", size=12)
-    plt.title("Logistic Regression Accuracy for Doc2Vec50 vs. C Hyperparameter", weight="bold", size=14)
-    plt.show()
+# - REDONE GRIDSEARCH WITH NEW DIMENSIONALITY
+# # ---------- Varying C parameter of logistic Regression for doc2vec50
+# def run_lgr_C(dataset, class_labels, n_CV_splits, c_range=np.logspace(-4, 4, 30)):
+#     kf = StratifiedKFold(n_splits=n_CV_splits, shuffle=True, random_state=RANDOM_STATE)
+#     c_acc = []
+#     c_f1_scores = []
+#     for c in c_range:
+#         lgr = LogisticRegression(C=c)
+#         acc_50 = []
+#         f1_scores_50 = []
+#         for train, test in kf.split(dataset, class_labels):
+#             lgr.fit(dataset.loc[train], class_labels.loc[train])
+#             acc_50.append(lgr.score(dataset.loc[test], class_labels.loc[test]))
+#             predicted = lgr.predict(dataset.loc[test])
+#             f1_scores_50.append(f1_score(class_labels.loc[test], predicted, average='weighted'))
+#         c_acc.append(np.average(acc_50))
+#         c_f1_scores.append(np.average(f1_scores_50))
+#
+#     c_results_acc = np.array(c_acc)
+#     c_results_f1 = np.array(c_f1_scores)
+#     np.save('./results/lgr/lgr_for_d2v50_vs_C_acc.npy', c_results_acc)
+#     np.save('./results/lgr/lgr_for_d2v50_vs_C_f1.npy', c_results_f1)
+#
+#
+# # ---------- Graph for above
+# def plot_lgr_C(c_range=np.logspace(-4, 4, 30)):
+#     c_results_acc = np.load('./results/lgr/lgr_for_d2v50_vs_C_acc.npy')
+#     c_results_f1 = np.load('./results/lgr/lgr_for_d2v50_vs_C_f1.npy')
+#     plt.rcParams['figure.figsize'] = [10, 7]
+#     plt.xscale('log')
+#     plt.ylim(0.5, 1)
+#     plt.plot(c_range, c_results_acc, 'bo', linestyle='-', label="Accuracy")
+#     plt.plot(c_range, c_results_f1, 'ro', linestyle='-', label="F1 Score")
+#     plt.legend(loc='upper left', shadow=True, title="Evaluation Metric", title_fontsize=12)
+#     plt.xlabel("C Value", size=12)
+#     plt.ylabel("Evaluation Value", size=12)
+#     plt.title("Logistic Regression Accuracy for Doc2Vec50 vs. C Hyperparameter", weight="bold", size=14)
+#     plt.show()
 
 
 # ---------- Selecting K-best CountVec features and adding them to Doc2vec50
@@ -514,8 +514,8 @@ def run_adaboost(dim, n_CV_splits):
         "accuracy": []
     }
 
-    lgr = LogisticRegression(max_iter=200, random_state=RANDOM_STATE)
-    ab_lgr = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200), learning_rate=1, n_estimators=100, random_state=RANDOM_STATE)
+    lgr = LogisticRegression(max_iter=200, random_state=RANDOM_STATE, C=0.015)
+    ab_lgr = AdaBoostClassifier(base_estimator=LogisticRegression(max_iter=200, C=0.31), random_state=RANDOM_STATE)
 
     clfs = {"Logisitc Regression": lgr,
             "AdaBoost LogReg": ab_lgr}
@@ -667,11 +667,11 @@ if __name__ == "__main__":
     # run_ensemble_compare(150, 5)
     # plot_ensemble_compare()
 
-    run_bagging(150, 5)
-    plot_bagging()
+    # run_bagging(150, 5)
+    # plot_bagging()
 
-    # run_adaboost(150, 5)
-    # plot_adaboost()
+    run_adaboost(150, 5)
+    plot_adaboost()
 
     # param_space = [0.0001, 0.001, 0.01, 0.015, 0.02, 0.05, 0.08, 0.1, 1, 10]
     # gridsearch_c(param_space, 150, xval_size=5)
