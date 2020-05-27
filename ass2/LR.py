@@ -636,19 +636,6 @@ def confusion_matrix(dim, n_splits):
     plot_confusion_matrix(cm, "Logistic Regression Confusion Matrix (Doc2Vec150)")
 
 
-def plot_confusion_matrix(cm, title):
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['1', '3', '5'])
-    disp.plot(include_values='true',
-              cmap=plt.cm.Blues)
-    plt.grid(b=False)
-    plt.title(title,
-              weight="bold", size=14)
-    plt.ylabel('True Rating')
-    plt.xlabel('Predicted Rating')
-    plt.show()
-
-
-
 
 if __name__ == "__main__":
     # Meta adaboosting data
