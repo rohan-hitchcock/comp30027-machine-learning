@@ -1,5 +1,5 @@
 from sklearn.ensemble import StackingClassifier
-from sklearn import svm
+from sklearn import svm, metrics
 from polarized_svm import PolarizedSVM
 from sklearn.linear_model import LogisticRegression
 from generate_docvecs import get_doc2vec_crossval
@@ -15,6 +15,8 @@ from LR import autolabel
 # Logistic Regression: C=0.015, dim=150
 from sklearn.metrics import f1_score, accuracy_score
 
+from plotting import plot_confusion_matrix
+
 RANDOM_STATE = 7
 
 
@@ -29,10 +31,10 @@ def stacking(n_splits=5):
         estimators=[('LogReg', LogisticRegression(max_iter=200, C=0.015)),
                     ('LinearSVM', svm.SVC(kernel='linear', C=0.009))],
         final_estimator=LogisticRegression(max_iter=200))
-    # stack_polar = StackingClassifier(
-    #     estimators=[('LogReg', LogisticRegression(max_iter=200, C=0.015)),
-    #                 ('PolarSVM', PolarizedSVM(0.9, 3, C=0.0025))],
-    #     final_estimator=LogisticRegression(max_iter=200))
+    stack_svm = StackingClassifier(
+        estimators=[('LinearSVM', svm.SVC(kernel='linear', C=0.009)),
+                    ('RBFSVM', svm.SVC(kernel='rbf', C=1.25))],
+        final_estimator=LogisticRegression(max_iter=200))
     stack_rbf = StackingClassifier(
         estimators=[('LogReg', LogisticRegression(max_iter=200, C=0.015)),
                     ('RBFSVM', svm.SVC(kernel='rbf', C=1.25))],
@@ -44,6 +46,7 @@ def stacking(n_splits=5):
         final_estimator=LogisticRegression(max_iter=200))
 
     clfs = {"Stacked Linear SVM & LogReg": stack_linear,
+            "Stacked RBF & Linear SVM": stack_svm,
             "Stacked RBF & LogReg": stack_rbf,
             "Stacked Linear, RBF & LogReg": stack_all}
 
@@ -57,7 +60,7 @@ def stacking(n_splits=5):
         else:
             dim = 150
         for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_splits):
-            if name == "Stacked RBF & LogReg" or name == "Stacked Linear, RBF & LogReg":
+            if name == "Stacked RBF & LogReg" or name == "Stacked Linear, RBF & LogReg" or name == "Stacked RBF & Linear SVM":
                 true_gamma = (gamma / (np.array(Xtrain).var() * len(Xtrain.columns)))
                 clf.set_params(RBFSVM__gamma=true_gamma)
 
@@ -75,7 +78,7 @@ def stacking(n_splits=5):
 def plot_stacking():
     stacking = pd.read_csv("./results/stacking/stacking_compare.csv", index_col=0, header=0)
     plt.rcParams['figure.figsize'] = [10, 7]
-    X = np.arange(3)
+    X = np.arange(4)
     ind = X + 0.15
     plt.ylim(0.5, 1)
     bars = plt.bar(X + 0.00, stacking['accuracy'], color='royalblue', width=0.3)
@@ -94,7 +97,26 @@ def plot_stacking():
     plt.legend(('Accuracy', 'F1 Score'), shadow=True, title="Evaluation Metric", title_fontsize=12)
     plt.show()
 
+def confusion_matrix_all(dim, n_splits):
+    cm = np.zeros((3, 3))
+    for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_splits):
+        model = StackingClassifier(
+            estimators=[('LinearSVM', svm.SVC(kernel='linear', C=0.009)),
+                        ('RBFSVM', svm.SVC(kernel='rbf', C=1.25)),
+                        ('LogReg', LogisticRegression(max_iter=200, C=0.015))],
+            final_estimator=LogisticRegression(max_iter=200))
+        model.fit(Xtrain, ytrain)
+
+        predictions = model.predict(Xtest)
+
+        cm += metrics.confusion_matrix(ytest, predictions, normalize='true')
+
+    cm = cm / n_splits
+    np.savetxt("./results/stacking/cm_stacked_all.csv", cm)
+    plot_confusion_matrix(cm, "Stacked Linear SVM, RBF SVM & Logistic Regression \n Confusion Matrix (Doc2Vec150)")
+
 
 if __name__ == "__main__":
-    # stacking()
+    stacking()
     plot_stacking()
+    confusion_matrix_all()
