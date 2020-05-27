@@ -51,10 +51,13 @@ def gridsearch_heatmap(ax, df, xax_col, yax_col, val_col, lims=None):
                 heat_map[yi][xi] = np.nan
     
     vmin, vmax = lims if lims is not None else (None, None)
-
+    xax_vals = [str(xv *1000) for xv in xax_vals]
     sns.heatmap(heat_map, vmin=vmin, vmax=vmax, ax=ax, cmap="YlGnBu", xticklabels=xax_vals, yticklabels=yax_vals)
 
 def gridsearch_heatmap_1d(ax, df, xax_col, val_col, lims=None):
+
+
+    print(df)
 
     xax_vals = np.unique(df[xax_col])
 
@@ -81,23 +84,48 @@ def gridsearch_heatmap_1d(ax, df, xax_col, val_col, lims=None):
 
     heat_map = np.expand_dims(heat_map, axis=0)
 
-    xax_vals = [round(xv, ndigits=3) for xv in xax_vals]
+    xax_vals = [round(xv, ndigits=4) for xv in xax_vals]
     heat_map = heat_map.transpose()
 
     sns.heatmap(heat_map, vmin=vmin, vmax=vmax, ax=ax, cmap="YlGnBu", xticklabels=False, yticklabels=xax_vals, square=True)
 
 if __name__ == "__main__":
 
-    gridsearch = pd.read_csv("./results/svm/gridsearch_linear_150.csv", sep=', ')
+    gridsearch = pd.read_csv("./results/svm/gridsearch_polar_125.csv", sep=', ')
     
 
     
 
-    #gridsearch_rbf = gridsearch_rbf[(gridsearch_rbf['C'] <= 1.75) & (gridsearch_rbf['C'] >= 0.5)]
+    #gridsearch = gridsearch[(gridsearch['C'] <= 1.5) & (gridsearch['C'] >= 0.005)]
 
+    """
+    cs = np.array(gridsearch['C'])
+    fs = np.array(gridsearch['fscore'])
+
+    colspace = np.linspace(0.007, 1.5, 214)
+
+    hm_data = np.empty((len(colspace), 2))
+    for i, C in enumerate(colspace):
+
+        hm_data[i][0] = C
+
+        int_fscore = fs[np.argmin(np.absolute(cs - C))]
+
+        hm_data[i][1] = int_fscore
+
+
+    hm_data = pd.DataFrame(hm_data)
+    hm_data.columns = ['C', 'fscore']
+    print(hm_data)
+
+
+    """
 
     xax_col = 'C'
+    yax_col = 'thresh'
     val_col = 'fscore'
+    
+    
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -105,9 +133,10 @@ if __name__ == "__main__":
     fig.tight_layout()
 
     
-    gridsearch_heatmap_1d(ax, gridsearch, xax_col, val_col)
+    gridsearch_heatmap(ax, gridsearch, xax_col, yax_col, val_col)
 
-    #ax.set_xlabel("C")
+    ax.set_xlabel("$C$ $(\\times 10 ^{-3})$")
+    ax.set_ylabel("$p_T$")
 
     plt.show()
 
