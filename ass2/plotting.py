@@ -54,11 +54,41 @@ def gridsearch_heatmap(ax, df, xax_col, yax_col, val_col, lims=None):
 
     sns.heatmap(heat_map, vmin=vmin, vmax=vmax, ax=ax, cmap="YlGnBu", xticklabels=xax_vals, yticklabels=yax_vals)
 
+def gridsearch_heatmap_1d(ax, df, xax_col, val_col, lims=None):
 
+    xax_vals = np.unique(df[xax_col])
+
+    heat_map = np.empty(len(xax_vals))
+
+    for xi, xval in enumerate(xax_vals):
+
+
+        row = df[(df[xax_col] == xval)]
+
+        if row.empty:
+            heat_map[xi] = np.nan
+
+        elif len(row) == 1:
+            heat_map[xi] = float(row[val_col])
+
+        else:
+            print("WARNING: multiple values encountered gridsearch:")
+            print(row)
+            print("Filling with nan.")
+            heat_map[xi] = np.nan
+
+    vmin, vmax = lims if lims is not None else (None, None)
+
+    heat_map = np.expand_dims(heat_map, axis=0)
+
+    xax_vals = [round(xv, ndigits=3) for xv in xax_vals]
+    heat_map = heat_map.transpose()
+
+    sns.heatmap(heat_map, vmin=vmin, vmax=vmax, ax=ax, cmap="YlGnBu", xticklabels=False, yticklabels=xax_vals, square=True)
 
 if __name__ == "__main__":
 
-    gridsearch = pd.read_csv("./results/svm/gridsearch_polar_125.csv", sep=', ')
+    gridsearch = pd.read_csv("./results/svm/gridsearch_linear_150.csv", sep=', ')
     
 
     
@@ -67,7 +97,6 @@ if __name__ == "__main__":
 
 
     xax_col = 'C'
-    yax_col = 'thresh'
     val_col = 'fscore'
 
     fig = plt.figure()
@@ -76,10 +105,9 @@ if __name__ == "__main__":
     fig.tight_layout()
 
     
-    gridsearch_heatmap(ax, gridsearch, xax_col, yax_col, val_col)
+    gridsearch_heatmap_1d(ax, gridsearch, xax_col, val_col)
 
-    ax.set_xlabel("C")
-    ax.set_ylabel("$p_T$")
+    #ax.set_xlabel("C")
 
     plt.show()
 
