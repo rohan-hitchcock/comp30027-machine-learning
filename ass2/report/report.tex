@@ -23,17 +23,48 @@ The goal of this project was to predict the star ratings of a review of a restau
 
 \section{Background}
 This task is a type of sentiment analysis: the task of predicting sentiment from text. \drafting{discussion of background literature}
-    
+
 \section{Method} \label{sec:method}
 We investigated models based on logistic regression (detailed in Section \ref{subsec:method-lr}) and support vector machine (detailed in Section \ref{subsec:method-svm}) techniques, in each case using the implementations made available through the Scikit Learn Python library \cite{sklearn_pedregosa_scikit-learn_2011}. These models used paragraph vector encodings of the review text, which was produced using the implementation made available through the Gensim Python library \cite{gensim_rehurek_software_2010}. 
 
 \drafting{Move to results?}
-In addition to model-specific hyperparameters (which will be discussed in the respective sections) the dimension of the parameter vector space embedding is a hyperparameter for all of our models. This can be interpreted as a measure of complexity of the model. As the dimension of the paragraph vector encoding a review increases, the degree to which the paragraph vector can capture the information in the review will increase too. Not all of the information in a review is likely to be useful for this classification task however\footnote{Review text also may contain information such as the cuisine of the restaurant, the time-of-day of the visit and the gender of the wait-staff, much of which is likely irrelevant to the task at hand.}, so there is a point at which increasing the dimension of the feature space will lead to over-fitting and degrade the performance of the classifier. 
+In addition to model-specific hyperparameters (which will be discussed in the respective sections) the dimension of the parameter vector space embedding is a hyperparameter for all of our models. This can be interpreted as a measure of complexity of the model. As the dimension of the paragraph vector encoding a review increases, the degree to which the paragraph vector can capture the information in the review will increase too. Not all of the information in a review is likely to be useful for this classification task however\footnote{Review text also may contain information such as the cuisine of the restaurant, the time-of-day of the visit and the gender of the wait-staff, much of which is likely irrelevant to the task at hand.}, so there is a point at which increasing the dimension of the feature space will lead to over-fitting and degrade the performance of the classifier.
+\subsection{Feature Selection} \label{subsec:method-features}
 
+We investigated two text features, a Bag-of-Words model and paragraph vectors. We used Principle Component Analysis and Singular Value Decomposition to reduce the dimensionality of each of the pre-computed text features to 2 dimensions to help visualise any clusters or separation of classes. It was found that the high dimensional paragraph vectors did a much better job of separating the instances of each class than Bag-of-words models, as unique clusters were more visible and separated.
+
+Further testing was done to see if a combination of attributes from these features (ie, words from the Bag-of-Words model added to paragraph vectors of increasing dimensions) could lead to an improvement in accuracy than either one of them alone when used to train a basic Logistic Regression model. We found that Paragraph vectors performed far better, and the addition of the K-best words from the Bag-of-Words model (Selected using Chi2), \drafting{(I have actually got an explanation for why, should I put it in?)} to a paragraph vector feature set had no significant impact on performance.
+
+We decided to use Paragraph Vectors as our primary text feature for further analysis.
 \subsection{Logistic regression} \label{subsec:method-lr}
 \drafting{
-Explain machine learning models used, and why they were used. 
+We investigated a single Logistic Regression model for multi-class classification; Multinomial Logistic Regression. Multinomial Logistic Regression generalises Logistic Regression to multi class problems. It is probabilistic, constructing a linear predictor function that assigns a score to each instance by computing the dot-product of it's features with their corresponding weights. We choose the weights to have the maximum likelihood to observing all training instances with their particular classes. New instances are classified by determining which class is most likely given its features.
+Multinomial Logistic Regression has a single hyperparameter C, which is the inverse of the L2-Regularisation strength, a measure of how strict the model is fit to the training data and avoids mis-classifying training instances.
+We investigated several ensembles of Logistic Regression to determine whether the performance could be improved, using Boosting and Bagging techniques.
+Paragraph Vectors were used over a Bag-of-words as explained in section ____}
+\subsubsection*{Justifying Logistic Regression model selection}
+\drafting{
+Other options exist for multi-class classification using Logistic Regression, such as training multiple binary Logistic Regressors (one for each class label) using a One-versus-rest scheme and predicting based on the model with the highest score, or a popular alternative Ordinal Logistic Regression which is particularly suited for ordinal class labels.
+One-versus-rest models are less efficient, tending to have larger standard errors (Agresti, 2002).
+Ordinal Logistic Regression is not implemented as part of the standard Scikit Learn Python library and thus was not investigated due to time constraints.
 }
+
+\drafting{
+Another important note is that Multinomial Logistic Regression assumes the Independence of Irrelevant Alternatives axiom. It is an axiom of Decision Theory and other social sciences, which varies in definition depending on context. In social sciences, it can be thought of as meaning:
+`The social preferences between alternatives x and y depend only on the individual preferences between x and y' (Arrow, 1963).
+We can relate this to the context of reviewing restaurants by saying:
+Given a reviewer gives a rating of 1 to a particular restaurant, with options only 1 or 5, the inclusion of a third option 3, should not make the alternative original option 5 more preferable (It may however make the new option, 3, more preferable).
+We think this assumption is acceptable given the motivation behind choosing a particular rating for a restaurant is presumed to be based on an experience which is unchanged after the fact.
+}
+
+\drafting{
+Logistic Regression was chosen as a probabilistic model as a point of comparison to a linear model such as SVM providing a variety of model types for classification.
+}
+
+\drafting{
+Logistic Regression may perform better as a probabilistic supervised Machine learning classifier than the more commonly used Naive Bayes, as it does not make the assumption that features are conditionally independent. Naive Bayes has higher bias but lower variance than Logistic Regression, and in general, as the training size tends to infinity, Logistic Regression performs better as a classifier (Ng and Jordan, 2002)
+}}
+
 \subsection{Support vector machine} \label{subsec:method-svm}
 We investigated three variants of support vector machine (SVM) classifiers: a SVM with a linear kernel and one-verses-rest multi-class classification (Linear-SVM), a SVM model with a radial basis function (RBF) kernel and one-verses-rest multi-class classification (RBF-SVM), and a SVM with a linear kernel separating the positive and negative sentiment classes, in which marginal instances are classified as having neutral sentiment (Binary-SVM). 
 
@@ -48,7 +79,10 @@ Under the assumption that positive and negative sentiment reviews are exactly op
 
 
 \subsection{Stacking model}
-
+\drafting{
+Stacking aims to increase predictive performance by training base classifiers on the training data, then training a meta classifier on the outputs of the base classifiers as features. We investigated stacking all pairs from our best classifiers, Logistic Regression, RBF SVM and Linear SVM, as well as all three. For every combination, we used the parameters found to produce the best performance for each classifier alone. Logistic Regression was used as the meta-classifier in each case (with no parameter tuning).
+We further analysed the performance of the best stacked classifier in detail.
+}
 
 \section{Results}
 \drafting{discussion of why we used stratified splits?}
