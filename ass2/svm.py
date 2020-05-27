@@ -159,6 +159,51 @@ def learning_curve(model, fname_test, fname_train):
         del ytrain
         del ytest
 
+def learning_curve_rbf(c, gamma, fname_test, fname_train):
+
+
+    with open(fname_test, "a") as fp:
+        fp.write("dim, fscore, accuracy, precision, recall\n" )
+
+    with open(fname_train, "a") as fp:
+        fp.write("dim, fscore, accuracy, precision, recall\n" )
+
+
+    for dim in range(25, 301, 25):
+        
+        print(f"dim = {dim}")
+
+        Xtrain, Xtest, ytrain, ytest = get_dot2vec_split(dim)
+
+        true_gamma = gamma / (np.array(Xtrain).var() * len(Xtrain.columns))
+        model = svm.SVC(kernel='rbf', C=c, gamma=true_gamma)
+
+        model.fit(Xtrain, ytrain)
+
+        predictions = model.predict(Xtest)
+
+        fscore = metrics.f1_score(ytest, predictions, average='weighted')
+        accuracy = metrics.accuracy_score(ytest, predictions)
+        precision = metrics.precision_score(ytest, predictions, average='weighted')
+        recall =  metrics.recall_score(ytest, predictions, average='weighted')
+
+        with open(fname_test, 'a') as fp:
+            fp.write(f"{dim}, {fscore}, {accuracy}, {precision}, {recall}\n")
+
+        predictions = model.predict(Xtrain)
+
+        fscore = metrics.f1_score(ytrain, predictions, average='weighted')
+        accuracy = metrics.accuracy_score(ytrain, predictions)
+        precision = metrics.precision_score(ytrain, predictions, average='weighted')
+        recall = metrics.recall_score(ytrain, predictions, average='weighted')
+
+        with open(fname_train, 'a') as fp:
+            fp.write(f"{dim}, {fscore}, {accuracy}, {precision}, {recall}\n")
+
+        del Xtrain
+        del Xtest
+        del ytrain
+        del ytest
 
 
 def gridsearch_c(param_space, dim, kernel, xval_size=5):
@@ -282,10 +327,66 @@ def gridsearch_c_gamma(param_space, dim, kernel, xval_size=5):
             fp.write(f"{c}, {gamma}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
 
 
+print("learning curve for rbf...")
+C = 1.25
+gamma = 0.6
+learning_curve_rbf(C, gamma, "./results/svm/learning_curve_rbf_final_test.csv", "./results/svm/learning_curve_rbf_final_train.csv")
+
+
+print("confusion matrix for rbf...")
+cm = np.zeros((3, 3))
+xval_size = 5
 dim = 125
-kernel = 'rbf'
+for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
+
+    true_gamma = gamma / (np.array(Xtrain).var() * len(Xtrain.columns))
+    model = svm.SVC(kernel='rbf', C=C, gamma=true_gamma)
+    model.fit(Xtrain, ytrain)
+
+    predictions = model.predict(Xtest)
+
+    cm += metrics.confusion_matrix(ytest, predictions)
+
+cm = cm / xval_size
+np.savetxt("./results/svm/cm_rbf_final.csv", cm)
+
+
+print("learning curve for binary...")
+model = PolarizedSVM(threshold=0.9, middle_class=3, C=0.0025)
+learning_curve(model, "./results/svm/learning_curve_binary_final_test.csv", "./results/svm/learning_curve_binary_final_train.csv")
+
+print("confusion matrix for binary...")
+cm = np.zeros((3, 3))
+xval_size = 5
+dim = 125
+for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
+    model.fit(Xtrain, ytrain)
+    predictions = model.predict(Xtest)
+    cm += metrics.confusion_matrix(ytest, predictions)
+
+cm = cm / xval_size
+np.savetxt("./results/svm/cm_binary_final.csv", cm)
+
+print("Confusion matrix for linear....")
+model = svm.SVC(kernel='linear', C=0.009)
+cm = np.zeros((3, 3))
+xval_size = 5
+dim = 150
+for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, xval_size):
+    model.fit(Xtrain, ytrain)
+    predictions = model.predict(Xtest)
+    cm += metrics.confusion_matrix(ytest, predictions)
+
+cm = cm / xval_size
+np.savetxt("./results/svm/cm_linear_final.csv", cm)
+
+
+
+"""
 param_space = list(itertools.product([1, 1.25], [0.2, 0.1]))
 gridsearch_c_gamma(param_space, dim, kernel)
+"""
+
 
 """
 param_space = list(itertools.product([0.0005, 0.001, 0.0015, 0.002], [0.95]))

@@ -3,8 +3,7 @@
 \bibitem[\protect\citename{Koppel and Schler}2006]{koppel_importance_2006}
 Moshe Koppel and Jonathan Schler.
 \newblock 2006.
-\newblock {THE} {IMPORTANCE} {OF} {NEUTRAL} {EXAMPLES} {FOR} {LEARNING}
-  {SENTIMENT}.
+\newblock The importance of neutral examples for learning sentiment.
 \newblock 22(2):100--109.
 
 \bibitem[\protect\citename{Le and Mikolov}2014]{le_distributed_2014}
@@ -12,11 +11,18 @@ Quoc~V. Le and Tomas Mikolov.
 \newblock 2014.
 \newblock Distributed representations of sentences and documents.
 
+\bibitem[\protect\citename{Medhat \bgroup et al.\egroup
+  }2014]{medhat_sentiment_2014}
+Walaa Medhat, Ahmed Hassan, and Hoda Korashy.
+\newblock 2014.
+\newblock Sentiment analysis algorithms and applications: A survey.
+\newblock 5(4):1093--1113.
+
 \bibitem[\protect\citename{Mukherjee \bgroup et al.\egroup
   }2013]{mukherjee_what_2013}
 Arjun Mukherjee, Vivek Venkataraman, Bing Liu, and Natalie Glance.
 \newblock 2013.
-\newblock What yelp fake review filter might be doing?
+\newblock What {Y}elp fake review filter might be doing?
 \newblock In {\em 7th International {AAAI} Conference on Weblogs and Social
   Media}.
 

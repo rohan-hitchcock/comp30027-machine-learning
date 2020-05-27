@@ -58,26 +58,28 @@ def gridsearch_heatmap(ax, df, xax_col, yax_col, val_col, lims=None):
 
 if __name__ == "__main__":
 
-    gridsearch_rbf = pd.read_csv("./results/svm/gridsearch_rbf_125.csv", sep=', ')
+    gridsearch = pd.read_csv("./results/svm/gridsearch_polar_125.csv", sep=', ')
     
 
     
 
-    gridsearch_rbf = gridsearch_rbf[(gridsearch_rbf['C'] <= 1.75) & (gridsearch_rbf['C'] >= 0.5)]
+    #gridsearch_rbf = gridsearch_rbf[(gridsearch_rbf['C'] <= 1.75) & (gridsearch_rbf['C'] >= 0.5)]
 
 
     xax_col = 'C'
-    yax_col = 'gamma'
+    yax_col = 'thresh'
     val_col = 'fscore'
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
+    fig.tight_layout()
+
     
-    gridsearch_heatmap(ax, gridsearch_rbf, xax_col, yax_col, val_col)
+    gridsearch_heatmap(ax, gridsearch, xax_col, yax_col, val_col)
 
     ax.set_xlabel("C")
-    ax.set_ylabel("Gamma")
+    ax.set_ylabel("$p_T$")
 
     plt.show()
 
