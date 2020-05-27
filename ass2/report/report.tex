@@ -41,7 +41,7 @@ We decided to use Paragraph Vectors as our primary text feature for further anal
 We investigated a single Logistic Regression model for multi-class classification; Multinomial Logistic Regression. Multinomial Logistic Regression generalises Logistic Regression to multi class problems. It is probabilistic, constructing a linear predictor function that assigns a score to each instance by computing the dot-product of it's features with their corresponding weights. We choose the weights to have the maximum likelihood to observing all training instances with their particular classes. New instances are classified by determining which class is most likely given its features.
 Multinomial Logistic Regression has a single hyperparameter C, which is the inverse of the L2-Regularisation strength, a measure of how strict the model is fit to the training data and avoids mis-classifying training instances.
 We investigated several ensembles of Logistic Regression to determine whether the performance could be improved, using Boosting and Bagging techniques.
-Paragraph Vectors were used over a Bag-of-words as explained in section ____}
+Paragraph Vectors were used over a Bag-of-words as explained in section}
 \subsubsection*{Justifying Logistic Regression model selection}
 \drafting{
 Other options exist for multi-class classification using Logistic Regression, such as training multiple binary Logistic Regressors (one for each class label) using a One-versus-rest scheme and predicting based on the model with the highest score, or a popular alternative Ordinal Logistic Regression which is particularly suited for ordinal class labels.
@@ -63,7 +63,7 @@ Logistic Regression was chosen as a probabilistic model as a point of comparison
 
 \drafting{
 Logistic Regression may perform better as a probabilistic supervised Machine learning classifier than the more commonly used Naive Bayes, as it does not make the assumption that features are conditionally independent. Naive Bayes has higher bias but lower variance than Logistic Regression, and in general, as the training size tends to infinity, Logistic Regression performs better as a classifier (Ng and Jordan, 2002)
-}}
+}
 
 \subsection{Support vector machine} \label{subsec:method-svm}
 We investigated three variants of support vector machine (SVM) classifiers: a SVM with a linear kernel and one-verses-rest multi-class classification (Linear-SVM), a SVM model with a radial basis function (RBF) kernel and one-verses-rest multi-class classification (RBF-SVM), and a SVM with a linear kernel separating the positive and negative sentiment classes, in which marginal instances are classified as having neutral sentiment (Binary-SVM). 
