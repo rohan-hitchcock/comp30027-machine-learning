@@ -7,11 +7,12 @@ from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, ConfusionMatrixDisplay
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.ensemble import AdaBoostClassifier, BaggingClassifier
 import seaborn as sns
+from sklearn.metrics import plot_confusion_matrix
 
 plt.rcParams['figure.figsize'] = [10, 7]
 
@@ -23,6 +24,7 @@ from svm import learning_curve
 from generate_docvecs import get_dot2vec_split
 from generate_docvecs import get_doc2vec_crossval
 from plotting import gridsearch_heatmap
+from plotting import plot_confusion_matrix
 
 RANDOM_STATE = 7
 CV = 10
@@ -618,6 +620,36 @@ def plot_gridsearch_c(dim):
     plt.show()
 
 
+# ---------- Confusion Matrix for Doc2Vec150
+def confusion_matrix(dim, n_splits):
+    cm = np.zeros((3, 3))
+    for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_splits):
+        lgr = LogisticRegression(max_iter=200, C=0.015)
+        lgr.fit(Xtrain, ytrain)
+
+        predictions = lgr.predict(Xtest)
+
+        cm += metrics.confusion_matrix(ytest, predictions, normalize='true')
+
+    cm = cm / n_splits
+    np.savetxt("./results/lgr/cm_final.csv", cm)
+    plot_confusion_matrix(cm, "Logistic Regression Confusion Matrix (Doc2Vec150)")
+
+
+def plot_confusion_matrix(cm, title):
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['1', '3', '5'])
+    disp.plot(include_values='true',
+              cmap=plt.cm.Blues)
+    plt.grid(b=False)
+    plt.title(title,
+              weight="bold", size=14)
+    plt.ylabel('True Rating')
+    plt.xlabel('Predicted Rating')
+    plt.show()
+
+
+
+
 if __name__ == "__main__":
     # Meta adaboosting data
     train_set = pd.read_csv(r"./datasets/review_meta_train.csv")
@@ -670,9 +702,11 @@ if __name__ == "__main__":
     # run_bagging(150, 5)
     # plot_bagging()
 
-    run_adaboost(150, 5)
-    plot_adaboost()
+    # run_adaboost(150, 5)
+    # plot_adaboost()
 
     # param_space = [0.0001, 0.001, 0.01, 0.015, 0.02, 0.05, 0.08, 0.1, 1, 10]
     # gridsearch_c(param_space, 150, xval_size=5)
     # plot_gridsearch_c(150)
+
+    confusion_matrix(150, 5)

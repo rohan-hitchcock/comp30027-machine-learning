@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
-import seaborn as sns; sns.set()
+import seaborn as sns;
+from sklearn.metrics import ConfusionMatrixDisplay
+
+sns.set()
 
 def captialize(word):
     return word[0].upper() + word[1:]
@@ -54,7 +57,16 @@ def gridsearch_heatmap(ax, df, xax_col, yax_col, val_col, lims=None):
 
     sns.heatmap(heat_map, vmin=vmin, vmax=vmax, ax=ax, cmap="YlGnBu", xticklabels=xax_vals, yticklabels=yax_vals)
 
-
+def plot_confusion_matrix(cm, title):
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['1', '3', '5'])
+    disp.plot(include_values='true',
+              cmap=plt.cm.Blues)
+    plt.grid(b=False)
+    plt.title(title,
+              weight="bold", size=14)
+    plt.ylabel('True Rating')
+    plt.xlabel('Predicted Rating')
+    plt.show()
 
 if __name__ == "__main__":
 
