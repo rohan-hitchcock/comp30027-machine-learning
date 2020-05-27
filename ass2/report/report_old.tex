@@ -1,0 +1,82 @@
+\documentclass[11pt]{article}
+\usepackage{colacl}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[inline]{enumitem}
+\sloppy
+
+%used for identifying drafting or notes
+\newcommand{\drafting}[1]{\textcolor{OliveGreen}{#1}}
+
+\title{Paper Template for COMP30027 Report}
+\author
+{Anonymous}
+
+\renewcommand\labelenumi{(\theenumi)}
+
+\begin{document}
+\maketitle
+
+\section{Introduction and background}
+
+
+
+
+\section{Support vector machine approaches}
+%included!
+We investigated three main types of support vector machine (SVM) classifier: a SVM with a linear kernel and one-verses-rest multi-class classification (model A), a SVM model with a radial basis function (RBF) kernel and one-verses-rest multi-class classification (model B), and a SVM with a linear kernel separating the positive and negative sentiment classes, in which instances close to the boundary are classified as having neutral sentiment (model C). 
+
+%included!
+In model C, rather than using the raw distance to the hyperplane to determine marginal instances, we opted to use a variant of SVM which estimates the probability of an instance belonging to its class described in \cite{platt_probabilistic_1999}. 
+
+In all three cases paragraph vectors were used as features. \drafting{Link to next section}
+
+\subsection{Selection of main models}
+%included!
+\drafting{Link to previous section}
+For support vector machine classifiers we identified three broad hyperparameters which would result in different models: \begin{enumerate*}
+	\item The features selected, \label{item:svm-feature-selection}
+	\item The choice of kernel, and \label{item:svm-kernel}
+	\item How to approach the multi-class problem. \label{item:svm-multiclass-v-binary}
+\end{enumerate*}
+
+%included!
+For (\ref{item:svm-feature-selection}) we chose to use the paragraph vector encoding \cite{le_distributed_2014} since paragraph vectors have meaningful geometric relationships to one another. This makes them well suited to classification by a SVM model, which attempts to exploit the geometry of the feature space by fitting a hyperplane that separates classes. 
+
+%included
+For (\ref{item:svm-kernel}), given our choice of paragraph vectors as features, we expected that a linear kernel would be best suited to this task. This is because paragraph vectors are designed to transfer meaning to linear relationships between vectors: ``king'' - ``man'' + ``woman'' = ``queen'' \cite{le_distributed_2014}. If we suppose that 1 and 5 star reviews have opposite meaning (with 3 star reviews somewhere in between) we would expect these classes to be linearly separable in the paragraph vector encoding. Preliminary testing of SVM models with linear, radial basis function (RBF), polynomial and sigmoid kernels showed that the linear and RBF kernels had the best performance across all metrics.
+
+%included!
+For (\ref{item:svm-multiclass-v-binary}) we considered using the standard multi-class approaches for SVM models (classifying classes one-verses-one or one-verses-rest) in contrast to using a binary classifier to separate the 1 and 5 star classes (the negative and positive sentiment classes respectively), and classifying instances close to the boundary as neutral sentiment (3 star). While the latter approach is tempting, especially considering the purported ability of paragraph vectors to capture meaning through linear relationships, results in the literature suggest that this will always result in worse results than a standard multi-class approach \cite{koppel_importance_2006}. Nevertheless, we decided to pursue this approach as well. We opted to use a probabilistic variant of SVM to determine marginal instances (rather than the distance to the hyperplane) primarily because it makes the threshold hyperparameter less dependent on the dimension of the feature space. If this threshold were distance-based we would not expect distances in one feature space to correspond to distances in another feature space, making tuning these parameters much more difficult.
+
+\subsection{Tuning hyperparameters}
+%included
+We identified the following hyperparameters for each model. 
+\begin{description}
+	\item[Model A] The dimension of the feature vector encoding, the degree of regularisation.
+	\item[Model B] The dimension of the feature vector encoding, the degree of regularisation, the kernel coefficient. 
+	\item[Model C]  The dimension of feature encoding, the degree of regularisation, and the kernel coefficient.
+\end{description}
+
+%included!
+The dimension of the feature space can broadly be interpreted as a measure of the complexity of our model. As the dimension of the paragraph vector encoding a review increases, the degree to which the paragraph vector can capture the information in the review will increase too. Not all of the information in a review is likely to be useful for this classification task however\footnote{Review text also may contain information such as the cuisine of the restaurant, the time-of-day of the visit and the gender of the wait-staff, much of which is likely irrelevant to the task at hand.}, so there is a point at which increasing the dimension of the feature space will lead to over-fitting and degrade the performance of the classifier. 
+
+Due to the computational expense of producing paragraph vector encodings (producing cross-validation splits for many dimensions is out of the question) we opted to treat this hyperparameter somewhat differently to the others. For dimensions 25 to 300 in steps of 25, we computed the feature vectors of a 80:20 random holdout, only using the training set in each case to find the feature vector encoding. We then plotted the learning curve for each model (with other hyperparameters unturned) and identified the optimal dimension for that model. We then computed paragraph vector encodings for a 5-fold cross validation split at that dimension, again only using the training set of each split to produce the encoding. This cross-validation split was used to tune the remaining hyperparameters. \drafting{these splits were all stratified}
+
+The remaining hyperparameters were found using the precomputed cross-validation split using a grid search. Since each cross validation run \drafting{took a long time} parameter values were initially adjusted in large increments, and then a finer full grid search was done on regions of interest. The results of this can be seen in Figure \drafting{insert grid search figure}.
+
+
+%put any citations here which must be included in the bibliography but won't necessarily be referenced
+
+%citations for the dataset
+\nocite{mukherjee_what_2013}
+\nocite{rayana_collective_2015}
+
+%citations for software libraries
+\nocite{sklearn_pedregosa_scikit-learn_2011}
+\nocite{gensim_rehurek_software_2010}
+\bibliographystyle{acl}
+\bibliography{report}
+
+\end{document}
