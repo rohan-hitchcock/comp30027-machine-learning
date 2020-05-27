@@ -97,14 +97,13 @@ def plot_stacking():
     plt.legend(('Accuracy', 'F1 Score'), shadow=True, title="Evaluation Metric", title_fontsize=12)
     plt.show()
 
-def confusion_matrix_all(dim, n_splits):
+def confusion_matrix_svms(dim, n_splits):
     cm = np.zeros((3, 3))
     for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_splits):
         model = StackingClassifier(
-            estimators=[('LinearSVM', svm.SVC(kernel='linear', C=0.009)),
-                        ('RBFSVM', svm.SVC(kernel='rbf', C=1.25)),
-                        ('LogReg', LogisticRegression(max_iter=200, C=0.015))],
-            final_estimator=LogisticRegression(max_iter=200))
+        estimators=[('LinearSVM', svm.SVC(kernel='linear', C=0.009)),
+                    ('RBFSVM', svm.SVC(kernel='rbf', C=1.25))],
+        final_estimator=LogisticRegression(max_iter=200))
         model.fit(Xtrain, ytrain)
 
         predictions = model.predict(Xtest)
@@ -112,11 +111,11 @@ def confusion_matrix_all(dim, n_splits):
         cm += metrics.confusion_matrix(ytest, predictions, normalize='true')
 
     cm = cm / n_splits
-    np.savetxt("./results/stacking/cm_stacked_all.csv", cm)
-    plot_confusion_matrix(cm, "Stacked Linear SVM, RBF SVM & Logistic Regression \n Confusion Matrix (Doc2Vec150)")
+    np.savetxt("./results/stacking/cm_stacked_svm.csv", cm)
+    plot_confusion_matrix(cm, "")
 
 
 if __name__ == "__main__":
-    stacking()
-    plot_stacking()
-    confusion_matrix_all()
+    # stacking()
+    # plot_stacking()
+    confusion_matrix_svms(150, 5)
