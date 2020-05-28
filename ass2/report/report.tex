@@ -46,7 +46,7 @@ We investigated two ensembling techniques on MLR, Boosting and Bagging.}
 \subsubsection*{Justifying Logistic Regression model selection}
 \drafting{
 Several techniques exist for multi-class classification using Logistic Regression, such as training multiple binary Logistic Regressors (one for each class label) using a One-versus-rest scheme and predicting based on the model with the highest score, or Ordinal Logistic Regression, which is particularly suited for ordinal class labels.
-One-versus-rest models are less efficient, tending to have larger standard errors \cite{zbMATH01817585} \drafting{(Agresti, 2002)}.
+One-versus-rest models are less efficient, tending to have larger standard errors \cite{zbMATH01817585}.
 Ordinal Logistic Regression is not implemented as part of the standard Scikit Learn Python library and thus was not investigated due to time constraints.
 }
 
@@ -75,10 +75,10 @@ We further analysed the performance of the best stacked classifier in detail.
 
 \section{Results}
 \drafting{discussion of why we used stratified splits? We used stratified K-fold cross validation to ensure that the distribution of class labels in the training data was consistent among partitions}
-In order to identify the optimal feature space dimension for each model, we first evaluated our model \drafting{(using what metric? evaluated our model accuracy and F1 score on...)} (with hyperparameters untuned) on paragraph vector of dimensions 25 to 300 in steps of 25 encodings using an 80:20 stratified random holdout, only using the training set in each case to compute the paragraph vector embedding function. A random holdout method, rather than cross-validation, was used due to the computation expense of computing paragraph vector encodings: producing cross-validation splits for many dimensions was out of the question. For the RBF-SVM and Binary-SVM models this dimension was 125, and for the Linear-SVM and logistic regression models this dimension was 150.
+In order to identify the optimal feature space dimension for each model, we first evaluated our model \drafting{(using what metric? evaluated our model accuracy and F1 score on...)} (with hyperparameters untuned) on paragraph vector of dimensions 25 to 300 in steps of 25 encodings using an 80:20 stratified random holdout, only using the training set in each case to compute the paragraph vector embedding function. A random holdout method, rather than cross-validation, was used due to the computation expense of computing paragraph vector encodings: producing cross-validation splits for many dimensions was out of the question. For the RBF-SVM and Binary-SVM models this dimension was 125, and for the Linear-SVM and MLR models this dimension was 150.
 
 \drafting{Why cross validaton? (to prevent overfitting the hyperparameters)}
-We then computed the paragraph vector encodings for a 5-fold stratified cross validation split at that dimension, again only using the training set of each split to produce the encoding. This pre-computed split was then used to tune the remaining hyperparameters. Since each cross validation run \drafting{took a long time} parameter values were initially adjusted in large increments, and then a finer full grid search was done on regions of interest. We found that the best hyperparameter values were: for Linear-SVM $C = 0.009$, for RBF-SVM $(C, \gamma) = (1.25, 0.6)$ (Figure \ref{fig:rbf-gridsearch}), for Binary-SVM $(C, p_T) = 0.0025, 0.9)$ (Figure \ref{fig:binary-gridsearch}), and for Logistic Regression $C = 0.08$. 
+We then computed the paragraph vector encodings for a 5-fold stratified cross validation split at that dimension, again only using the training set of each split to produce the encoding. This pre-computed split was then used to tune the remaining hyperparameters. Since each cross validation run \drafting{took a long time} parameter values were initially adjusted in large increments, and then a finer full grid search was done on regions of interest. We found that the best hyperparameter values were: for Linear-SVM $C = 0.009$, for RBF-SVM $(C, \gamma) = (1.25, 0.6)$ (Figure \ref{fig:rbf-gridsearch}), for Binary-SVM $(C, p_T) = 0.0025, 0.9)$ (Figure \ref{fig:binary-gridsearch}), and for MLR $C = 0.015$.
 \begin{figure}
 	\centering
 	\includegraphics[width = 0.3\textwidth]{fig-rbf-gridsearch.png}
@@ -132,7 +132,7 @@ As discussed in Section \ref{sec:method} the dimension of the paragraph vector e
 \end{figure}
 
 
-\drafting{TALK about stacking results}
+\drafting{We evaluated our stacked models with the computed PVEs for a 5-fold stratified cross validation split, using the best hyperparameters for each respective base classifier, and untuned parameters for the meta-classifier (which was MLR in each case). When the base classifiers had different optimal dimensions for PVE, we selected the dimension optimal to the classifier with better sole performance. Stacking models took a long time to train and so not all dimensions could be investigated. Stacked RBF-SVM and Linear-SVM had a higher accuracy and F1-score than all other stacked models, including all 4 models stacked together. The results for this model can be seen in \ref{fig:stack-cm}}
 \begin{figure}
 	\centering
 	\includegraphics[width = 0.22\textwidth]{fig-stack-cm.png}
