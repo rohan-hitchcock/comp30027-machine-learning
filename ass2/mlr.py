@@ -677,4 +677,4 @@ if __name__ == "__main__":
     # plot_gridsearch_c(150)
 
     # confusion_matrix(150, 5)
-    kaggle_submission(150)
+    # kaggle_submission(150)

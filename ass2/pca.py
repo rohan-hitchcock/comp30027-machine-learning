@@ -176,5 +176,5 @@ if __name__ == "__main__":
 
     # plot_pca_components_3d(datasets_dict, low_rating, med_rating, high_rating)
     # plot_pca_components_2d(datasets_dict, low_rating, med_rating, high_rating)
-    plot_pca_components_vs_variance(datasets_dict, 50)
+    # plot_pca_components_vs_variance(datasets_dict, 50)
 

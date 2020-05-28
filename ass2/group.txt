@@ -1,2 +1,2 @@
-prandell, 836026, Patrick Randell
-rhitchcock, 836598, Rohan Hitchcock
+prandell,Patrick Randell
+rhitchcock,Rohan Hitchcock

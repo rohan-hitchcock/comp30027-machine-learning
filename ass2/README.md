@@ -17,6 +17,10 @@ The file `generate_docvecs.py` contains the functions used to generate train/tes
 * `compute_crossval_split(dim, num_splits)`
     * This was used for the optimal dimensions of each model (125, and 150)
 * functions within this file also load cross validation splits and random holdouts from file after they have been created
+
+**NOTE:**
+It is important that a folder `datasets` exists at the same level of all python files, containing the precomputed text features, and another folder `computed`. This computed folder is where all generated text features go (Each having their own generated folder).
+
     
 ## How to use relevant code
 * ##### Feature Selection: `pca.py`
