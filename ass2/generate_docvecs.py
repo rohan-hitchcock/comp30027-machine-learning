@@ -140,6 +140,10 @@ def compute_crossval_split(dim, num_splits):
 # MAIN
 if __name__ == "__main__":
 
+
+    #select dimenion here
+    dim = 125
+
     review_table_train = pd.read_csv(r"./datasets/review_text_train.csv", index_col = False, delimiter = ',', header=0)
     data_train = review_table_train['review']
 
@@ -149,10 +153,10 @@ if __name__ == "__main__":
     data_meta = pd.read_csv(r"./datasets/review_meta_train.csv")
     class_label = data_meta['rating']
 
-    test, train = compute_doc_embedding(data_train, data_test, 150)
+    test, train = compute_doc_embedding(data_train, data_test, dim)
 
-    pd.DataFrame(train).to_csv("./datasets/computed/all_train_d2v150.csv")
-    pd.DataFrame(test).to_csv("./datasets/computed/all_test_d2v150.csv")
-    class_label.to_csv("./datasets/computed/all_train_class.csv")
+    pd.DataFrame(train).to_csv(f"./datasets/computed/all_train_d2v{dim}.csv")
+    pd.DataFrame(test).to_csv(f"./datasets/computed/all_test_d2v{dim}.csv")
+    class_label.to_csv(f"./datasets/computed/all_train_class.csv")
 
 

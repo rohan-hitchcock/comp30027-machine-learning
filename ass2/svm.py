@@ -326,13 +326,22 @@ def gridsearch_c_gamma(param_space, dim, kernel, xval_size=5):
         with open(f"./results/svm/gridsearch_{kernel}_{dim}.csv", "a") as fp:
             fp.write(f"{c}, {gamma}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
 
+#select feature space dimension here
+dim = 125
 
-model = svm.SVC(kernel='linear', C=0.009)
-
-Xtrain = pd.read_csv(f"./datasets/computed/all_train_d2v150.csv", index_col=0) 
-Xtest = pd.read_csv(f"./datasets/computed/all_test_d2v150.csv", index_col=0) 
+Xtrain = pd.read_csv(f"./datasets/computed/all_train_d2v{dim}.csv", index_col=0) 
+Xtest = pd.read_csv(f"./datasets/computed/all_test_d2v{dim}.csv", index_col=0) 
 ytrain = pd.read_csv(f"./datasets/computed/all_train_class.csv", delimiter=',', header=None)
 ytrain = ytrain[1]
+
+#linear
+#model = svm.SVC(kernel='linear', C=0.009)
+
+#rbf
+model = svm.SVC(kernel="rbf", C=1.25, gamma=0.6 / (np.array(Xtrain).var() * len(Xtrain.columns)))
+
+#binary
+#model = PolarizedSVM(C=0.0025, threshold=0.9, middle_class=3)
 
 model.fit(Xtrain, ytrain)
 
@@ -344,4 +353,6 @@ predictions = pd.Series(predictions, index=pd.RangeIndex(1, 7019), name='rating'
 print(len(predictions))
 print(predictions)
 
-predictions.to_csv("./results/kaggle/svm_linear_dim150_c0.009.csv", index=True)
+outfile = "./results/kaggle/rbf.csv"
+
+predictions.to_csv(outfile, index=True)
