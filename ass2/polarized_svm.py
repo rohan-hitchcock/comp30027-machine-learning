@@ -2,9 +2,18 @@ from sklearn import svm
 import numpy as np
 
 class PolarizedSVM:
-
+    """ """
 
     def __init__(self, threshold, middle_class, kernel='linear', C=1.0):
+        """ This classifier is an SVM based classifier designed to classify data 
+            into three ordinal classes
+            Args:
+                threshold: the probability threshold a class must exceed to
+                be classified as such.
+                middle_class: the middle of the ordinal classes
+                kernel: the kernel of the base SVM classifier
+                C: the regularisation parameter.
+        """
         self.threshold = threshold
         self.middle_class = middle_class
         self.model = svm.SVC(C=C, kernel=kernel, probability=True)
@@ -21,10 +30,8 @@ class PolarizedSVM:
 
 
     def predict(self, X):
-        
 
         probs = self.model.predict_proba(X)
-        
         predictions = np.empty(len(probs))
 
         for i, class_probs in enumerate(probs):
