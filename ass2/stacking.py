@@ -114,8 +114,33 @@ def confusion_matrix_svms(dim, n_splits):
     np.savetxt("./results/stacking/cm_stacked_svm.csv", cm)
     plot_confusion_matrix(cm, "")
 
+def kaggle_submission(dim):
+    split_dir = f"all{dim}"
+
+    Xtrain = pd.read_csv(f"./datasets/computed/{split_dir}/all_train_d2v150.csv", index_col=0)
+    Xtest = pd.read_csv(f"./datasets/computed/{split_dir}/all_test_d2v150.csv", index_col=0)
+    ytrain = pd.read_csv(f"./datasets/computed/{split_dir}/all_train_class.csv", delimiter=',', index_col=0, header=None, names=['rating'])
+
+    print(Xtrain.head(3))
+    print(ytrain.head(3))
+    print(Xtrain.shape)
+    print(ytrain.shape)
+    model = StackingClassifier(
+        estimators=[('LinearSVM', svm.SVC(kernel='linear', C=0.009)),
+                    ('RBFSVM', svm.SVC(kernel='rbf', C=1.25))],
+        final_estimator=LogisticRegression(max_iter=200))
+    model.fit(Xtrain, ytrain)
+    predictions = model.predict(Xtest)
+    pd.Series(predictions, index=pd.RangeIndex(1, 7019), name='rating').to_csv("./results/kaggle/stacked_linear_rbf_dim150_series.csv")
+    df = {"Instance_id": list(range(1, 7019)), "rating": predictions}
+    pd.DataFrame(df).to_csv("./results/kaggle/stacked_linear_rbf_dim150.csv")
+
+
+
+
 
 if __name__ == "__main__":
     # stacking()
     # plot_stacking()
-    confusion_matrix_svms(150, 5)
+    # confusion_matrix_svms(150, 5)
+    kaggle_submission(150)

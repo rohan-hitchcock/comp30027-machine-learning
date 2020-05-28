@@ -327,24 +327,24 @@ def gridsearch_c_gamma(param_space, dim, kernel, xval_size=5):
             fp.write(f"{c}, {gamma}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
 
 
-model = svm.SVC(kernel='linear', C=0.009)
-
-Xtrain = pd.read_csv(f"./datasets/computed/all_train_d2v150.csv", index_col=0) 
-Xtest = pd.read_csv(f"./datasets/computed/all_test_d2v150.csv", index_col=0) 
-ytrain = pd.read_csv(f"./datasets/computed/all_train_class.csv", delimiter=',', header=None)
-ytrain = ytrain[1]
-
-model.fit(Xtrain, ytrain)
-
-predictions = model.predict(Xtest)
-
-
-predictions = pd.Series(predictions, index=pd.RangeIndex(1, 7019), name='rating')
-
-print(len(predictions))
-print(predictions)
-
-predictions.to_csv("./results/kaggle/svm_linear_dim150_c0.009.csv", index=True)
+# model = svm.SVC(kernel='linear', C=0.009)
+#
+# Xtrain = pd.read_csv(f"./datasets/computed/all_train_d2v150.csv", index_col=0)
+# Xtest = pd.read_csv(f"./datasets/computed/all_test_d2v150.csv", index_col=0)
+# ytrain = pd.read_csv(f"./datasets/computed/all_train_class.csv", delimiter=',', header=None)
+# ytrain = ytrain[1]
+#
+# model.fit(Xtrain, ytrain)
+#
+# predictions = model.predict(Xtest)
+#
+#
+# predictions = pd.Series(predictions, index=pd.RangeIndex(1, 7019), name='rating')
+#
+# print(len(predictions))
+# print(predictions)
+#
+# predictions.to_csv("./results/kaggle/svm_linear_dim150_c0.009.csv", index=True)
 
 """
 print("learning curve for rbf...")
