@@ -592,6 +592,25 @@ def confusion_matrix(dim, n_splits):
     plot_confusion_matrix(cm, "Logistic Regression Confusion Matrix (Doc2Vec150)")
 
 
+# ---------- Producing Kaggle submission for Logistic Regression
+def kaggle_submission(dim):
+    split_dir = f"all{dim}"
+
+    Xtrain = pd.read_csv(f"./datasets/computed/{split_dir}/all_train_d2v150.csv", index_col=0)
+    Xtest = pd.read_csv(f"./datasets/computed/{split_dir}/all_test_d2v150.csv", index_col=0)
+    ytrain = pd.read_csv(f"./datasets/computed/{split_dir}/all_train_class.csv", delimiter=',', index_col=0, header=None, names=['rating'])
+
+    print(Xtrain.head(3))
+    print(ytrain.head(3))
+    print(Xtrain.shape)
+    print(ytrain.shape)
+    model = LogisticRegression(max_iter=200, C=0.015)
+    model.fit(Xtrain, ytrain)
+    predictions = model.predict(Xtest)
+    pd.Series(predictions, index=pd.RangeIndex(1, 7019), name='rating').to_csv("./results/kaggle/lgr.csv")
+
+
+
 
 if __name__ == "__main__":
 
@@ -658,3 +677,4 @@ if __name__ == "__main__":
     # plot_gridsearch_c(150)
 
     # confusion_matrix(150, 5)
+    kaggle_submission(150)

@@ -135,7 +135,7 @@ def kaggle_submission(dim):
         final_estimator=LogisticRegression(max_iter=200))
     model.fit(Xtrain, ytrain)
     predictions = model.predict(Xtest)
-    pd.Series(predictions, index=pd.RangeIndex(1, 7019), name='rating').to_csv("./results/kaggle/stacked_linear_rbf_dim150_series.csv")
+    pd.Series(predictions, index=pd.RangeIndex(1, 7019), name='rating').to_csv("results/kaggle/stacked.csv")
     df = {"Instance_id": list(range(1, 7019)), "rating": predictions}
     pd.DataFrame(df).to_csv("./results/kaggle/stacked_linear_rbf_dim150.csv")
 
