@@ -1,12 +1,11 @@
 from sklearn.ensemble import StackingClassifier
 from sklearn import svm, metrics
-from polarized_svm import PolarizedSVM
 from sklearn.linear_model import LogisticRegression
 from generate_docvecs import get_doc2vec_crossval
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from LR import autolabel
+from mlr import autolabel
 
 # SVM
 # linear: C=0.009, dim=150
@@ -19,7 +18,7 @@ from plotting import plot_confusion_matrix
 
 RANDOM_STATE = 7
 
-
+# ---------- Comparing Accuracy and Fscore for all combinations of stacked classifiers
 def stacking(n_splits=5):
     eval_dict = {
         "clf": [],
@@ -75,6 +74,7 @@ def stacking(n_splits=5):
     pd.DataFrame(eval_dict).to_csv("./results/stacking/stacking_compare.csv")
 
 
+# ---------- Graph for above
 def plot_stacking():
     stacking = pd.read_csv("./results/stacking/stacking_compare.csv", index_col=0, header=0)
     plt.rcParams['figure.figsize'] = [10, 7]
@@ -97,6 +97,8 @@ def plot_stacking():
     plt.legend(('Accuracy', 'F1 Score'), shadow=True, title="Evaluation Metric", title_fontsize=12)
     plt.show()
 
+
+# ---------- Confusion matrix for RBF and Linear SVM stacked classifier
 def confusion_matrix_svms(dim, n_splits):
     cm = np.zeros((3, 3))
     for Xtrain, Xtest, ytrain, ytest in get_doc2vec_crossval(dim, n_splits):
@@ -114,6 +116,8 @@ def confusion_matrix_svms(dim, n_splits):
     np.savetxt("./results/stacking/cm_stacked_svm.csv", cm)
     plot_confusion_matrix(cm, "")
 
+
+# ---------- Producing Kaggle submission for RBF and Linear SVM
 def kaggle_submission(dim):
     split_dir = f"all{dim}"
 
@@ -134,9 +138,6 @@ def kaggle_submission(dim):
     pd.Series(predictions, index=pd.RangeIndex(1, 7019), name='rating').to_csv("./results/kaggle/stacked_linear_rbf_dim150_series.csv")
     df = {"Instance_id": list(range(1, 7019)), "rating": predictions}
     pd.DataFrame(df).to_csv("./results/kaggle/stacked_linear_rbf_dim150.csv")
-
-
-
 
 
 if __name__ == "__main__":
