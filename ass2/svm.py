@@ -117,7 +117,7 @@ def compute_class_proportions():
         print("-------------------")
 
 def learning_curve(model, fname_test, fname_train):
-
+    """ Learning curve for models with hyperparameters independnent of training set"""
 
     with open(fname_test, "a") as fp:
         fp.write("dim, fscore, accuracy, precision, recall\n" )
@@ -160,7 +160,7 @@ def learning_curve(model, fname_test, fname_train):
         del ytest
 
 def learning_curve_rbf(c, gamma, fname_test, fname_train):
-
+    """ Learnning curve for RBF-SVM"""
 
     with open(fname_test, "a") as fp:
         fp.write("dim, fscore, accuracy, precision, recall\n" )
@@ -207,7 +207,7 @@ def learning_curve_rbf(c, gamma, fname_test, fname_train):
 
 
 def gridsearch_c(param_space, dim, kernel, xval_size=5):
-
+    """ Gridsearch on the regularisaiton hyperparameter"""
     for i, c in enumerate(param_space):
         
         print(f"({i}/{len(param_space)}) values searched (C={c}).")
@@ -246,7 +246,7 @@ def gridsearch_c(param_space, dim, kernel, xval_size=5):
 
 
 def gridsearch_polar(param_space, dim, xval_size=5):
-
+    """ Gridsearch for the polar (aka Binary SVM)"""
     for i, param in enumerate(param_space):
         c, pthresh = param
         print(f"({i}/{len(param_space)}) values searched (C={c}, pthresh={pthresh}).")
@@ -284,7 +284,7 @@ def gridsearch_polar(param_space, dim, xval_size=5):
             fp.write(f"{c}, {pthresh}, {fscore / xval_size}, {accuracy / xval_size}, {precision / xval_size}, {recall / xval_size}\n")
 
 def gridsearch_c_gamma(param_space, dim, kernel, xval_size=5):
-
+    """ Gridsearch for the RBF svm"""
     for i, param in enumerate(param_space):
         c, gamma = param
         print(f"({i}/{len(param_space)}) values searched (C={c}). gamma={gamma}")
