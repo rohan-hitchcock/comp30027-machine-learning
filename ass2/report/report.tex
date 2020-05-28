@@ -22,7 +22,9 @@
 The goal of this project was to predict the star ratings of a review of a restaurant based on the review text. The data available for learning and evaluation consisted of approximately 250000 Yelp reviews, and is made available by \cite{medhat_sentiment_2014} and \cite{rayana_collective_2015}. Each review consists of the review text, a rating (1, 3 or 5 stars) and review metadata (which was not used). We sought to investigate to what extent it was possible to predict the rating of a review from the review text alone. 
 
 \section{Background}
-This task is a type of sentiment analysis: the task of predicting sentiment from text. \drafting{discussion of background literature}
+This task is a type of sentiment analysis: the task of predicting sentiment from text. Performing sentiment analysis first requires extracting features from text via some encoding. One common method is to convert a text Bag-of-Words, in which entries consist of word frequencies. This is method is simple, although has the disadvantage of producing very high dimensional features and not representing word ordering \cite{le_distributed_2014}. A more sophisticated technique is paragraph vector encoding, which uses a neural network to embed texts within an abstract vector space in such a way that semantically similar texts are closer \cite{le_distributed_2014}.
+
+Sentiment analysis tasks tend to deal with high dimension, sparse, and correlated features. This often leads to classes being linearly separable, making support vector machine models a popular choice \cite{medhat_sentiment_2014}. In terms of probabilistic classifiers, logistic regression models tend to perform well on sentiment analysis tasks since they do not assume features are independent, in contrast to other probabilistic classifiers like na\"{i}ve Bayes \cite{medhat_sentiment_2014}.
 
 \section{Method} \label{sec:method}
 We investigated models based on logistic regression (detailed in Section \ref{subsec:method-lr}) and support vector machine (detailed in Section \ref{subsec:method-svm}) techniques, in each case using the implementations made available through the Scikit Learn Python library \cite{sklearn_pedregosa_scikit-learn_2011}. These models used paragraph vector encodings of the review text, which was produced using the implementation made available through the Gensim Python library \cite{gensim_rehurek_software_2010}. 
@@ -75,7 +77,7 @@ Paragraph vector encoding is well suited to classification by an SVM model since
 
 The paragraph vector encoding of text is also designed to transfer relationships in the meaning of text to linear relationships between paragraph vectors: ``king'' - ``man'' + ``woman'' = ``queen'' \cite{le_distributed_2014}. If we suppose that negative and positive sentiment reviews have exactly opposite meanings (with neutral sentiment reviews somewhere in between) then we would expect the review text of these classes to be linearly separable with the paragraph vector encoding. Preliminary testing of different kernel functions (without tuning any hyperparameters) indeed showed that an SVM classifier with a linear kernel performed the best in every metric, however an SVM classifier came quite close in performance. For this reason we chose to continue with extended analysis of both.
 
-Under the assumption that positive and negative sentiment reviews are exactly opposite in meaning and that neutral sentiment reviews are some mixture (i.e. a linear combination in paragraph vector space) of positive and negative meanings, it seems plausible that the neutral sentiment reviews will lie close to the hyperplane which separates the positive and negative sentiment reviews. This encourages the consideration of a binary SVM classifier which distinguishes positive and negative reviews, where instances which fall in the margin are classified as neutral. Rather than using the raw distance to the hyperplane, opted to use a probabilistic variant of SVM which estimates the probability of an instance belonging to each class based on its distance to the hyperplane \cite{platt_probabilistic_1999}. This allowed us to use a probability threshold for neutral classification as a hyperparameter, rather than a distance threshold, which means the value of this threshold is independent of the specific paragraph vector embedding\footnote{The specific embedding of a particular text is only relevant in the context of the training corpus used to compute the embedding function \cite{le_distributed_2014}.}. A probability threshold also has the benefit of making the model more interpretable. Despite its apparent theoretical foundations, results in the literature suggest that such a classifier will always result in worse performance as compared to using a standard multi-class approach \cite{koppel_importance_2006}. Nevertheless we chose to pursue this approach as well.
+Under the assumption that positive and negative sentiment reviews are exactly opposite in meaning and that neutral sentiment reviews are some mixture (i.e. a linear combination in paragraph vector space) of positive and negative meanings, it seems plausible that the neutral sentiment reviews will lie close to the hyperplane which separates the positive and negative sentiment reviews. This encourages the consideration of a binary SVM classifier which distinguishes positive and negative reviews, where instances which fall in the margin are classified as neutral. Rather than using the raw distance to the hyperplane, opted to use a probabilistic variant of SVM which estimates the probability of an instance belonging to each class based on its distance to the hyperplane \cite{platt_probabilistic_1999}. This allowed us to use a probability threshold $p_T$ for neutral classification as a hyperparameter, rather than a distance threshold, which means the value of this threshold is independent of the specific paragraph vector embedding\footnote{The specific embedding of a particular text is only relevant in the context of the training corpus used to compute the embedding function \cite{le_distributed_2014}.}. A probability threshold also has the benefit of making the model more interpretable. Despite its apparent theoretical foundations, results in the literature suggest that such a classifier will always result in worse performance as compared to using a standard multi-class approach \cite{koppel_importance_2006}. Nevertheless we chose to pursue this approach as well.
 
 
 \subsection{Stacking model}
@@ -86,33 +88,88 @@ We further analysed the performance of the best stacked classifier in detail.
 
 \section{Results}
 \drafting{discussion of why we used stratified splits?}
-In order to identify the optimal feature space dimension for each model, we first evaluated our model \drafting{(using what metric?)} (with hyperparameters untuned) on paragraph vector of dimensions 25 to 300 in steps of 25 encodings using an 80:20 stratified random holdout, only using the training set in each case to compute the paragraph vector embedding function. A random holdout method, rather than cross-validation, was used due to the computation expense of computing paragraph vector encodings: producing cross-validation splits for many dimensions was out of the question. For the \drafting{logistic regression}, RBF-SVM and Binary-SVM models this dimension was 125, and for the Linear-SVM model this dimension was 150. 
+In order to identify the optimal feature space dimension for each model, we first evaluated our model \drafting{(using what metric?)} (with hyperparameters untuned) on paragraph vector of dimensions 25 to 300 in steps of 25 encodings using an 80:20 stratified random holdout, only using the training set in each case to compute the paragraph vector embedding function. A random holdout method, rather than cross-validation, was used due to the computation expense of computing paragraph vector encodings: producing cross-validation splits for many dimensions was out of the question. For the RBF-SVM and Binary-SVM models this dimension was 125, and for the Linear-SVM and logistic regression models this dimension was 150. 
 
-We then computed the paragraph vector encodings for a 5-fold stratified cross validation split at that dimension, again only using the training set of each split to produce the encoding. This pre-computed split was then used to tune the remaining hyperparameters. Since each cross validation run \drafting{took a long time} parameter values were initially adjusted in large increments, and then a finer full grid search was done on regions of interest. The results of this can be seen in Figure \drafting{insert grid search figure}.  \drafting{What are the best hyperparameters? with reference to the figures} \drafting{Why cross validaton? (to prevent overfitting the hyperparameters)} 
+\drafting{Why cross validaton? (to prevent overfitting the hyperparameters)}
+We then computed the paragraph vector encodings for a 5-fold stratified cross validation split at that dimension, again only using the training set of each split to produce the encoding. This pre-computed split was then used to tune the remaining hyperparameters. Since each cross validation run \drafting{took a long time} parameter values were initially adjusted in large increments, and then a finer full grid search was done on regions of interest. We found that the best hyperparameter values were: for Linear-SVM $C = 0.009$, for RBF-SVM $(C, \gamma) = (1.25, 0.6)$ (Figure \ref{fig:rbf-gridsearch}), for Binary-SVM $(C, p_T) = 0.0025, 0.9)$ (Figure \ref{fig:binary-gridsearch}), and for Logistic Regression $C = 0.08$. 
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.3\textwidth]{fig-rbf-gridsearch.png}
+	\caption{RBF-SVM Gridsearch}
+	\label{fig:rbf-gridsearch}
+\end{figure}
 
-After tuning the hyperparameters, we evaluated the final model trained on paragraph vectors of dimensions from 25 to 300 in steps of 25 to produce the learning curve in Figure \drafting{insert figure of learning curves}. As discussed in Section \ref{sec:method} the dimension of the paragraph vector encoding is a measure of the complexity of our model. We also evaluated our model on the 5-fold cross validation split at the optimal dimension, the results of which can be seen in Figure \drafting{insert figure of confusion matrix, and any other stuff we want to talk about in analysis}.
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.3\textwidth]{fig-binary-gridsearch.png}
+	\caption{Binary-SVM Gridsearch}
+	\label{fig:binary-gridsearch}
+\end{figure}
 
-\drafting{I think the stacking model would have been treated differently, need to talk about this here.}
+After tuning the hyperparameters, we evaluated the final model trained on paragraph vectors of dimensions from 25 to 300 in steps of 25 to produce the learning curve in Figure \ref{fig:learning-curve}. 
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.3\textwidth]{learning-curves.png}
+	\caption{Learning curve}
+	\label{fig:learning-curve}
+\end{figure}
 
-\drafting{
-Describe and compare model performance. (i.e. just say what the figures show)
-}
+
+As discussed in Section \ref{sec:method} the dimension of the paragraph vector encoding is a measure of the complexity of our model. We also evaluated our model on the 5-fold cross validation split at the optimal dimension, the results of which can be seen in Figures \ref{fig:binary-cm}, \ref{fig:linear-cm}, \ref{fig:rbf-cm}, \ref{fig:lr-cm}. 
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.3\textwidth]{fig-binary-cm.png}
+	\caption{Binary-SVM Confusion Matrix}
+	\label{fig:binary-cm}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.3\textwidth]{fig-linear-cm.png}
+	\caption{Linear-SVM Confusion Matrix}
+	\label{fig:linear-cm}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.3\textwidth]{fig-rbf-cm.png}
+	\caption{RBF-SVM Confusion Matrix}
+	\label{fig:rbf-cm}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.25\textwidth]{fig-lr-cm.png}
+	\caption{Logistic Regression Confusion Matrix}
+	\label{fig:lr-cm}
+\end{figure}
 
 
+\drafting{TALK about stacking results}
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.22\textwidth]{fig-stack-cm.png}
+	\caption{Stacking Confusion Matrix}
+	\label{fig:stack-cm}
+\end{figure}
 
 \section{Analysis}
-\drafting{
-Explain and interpret results. Identify weeknesses in methodology (more cross validation runs, more kernels for SVM).
-include comparison to baseline classifier (Zero-R, we don't acually need to compute this can just look at class proportions), error analysis via confusion matrix (put the figure in the results section though)
-}
+All models achieved better accuracy than the Zero-R baseline model, which has an accuracy of $69 \%$, which shows that the models were to some degree using features to effectively make predictions. All models, including the stacking models, did not exceed an F-Score of 0.83 on unseen data. Since stacking does not improve model performance significantly, and model performance is very similar, this suggests that all models are drawing roughly the same decision boundary between the classes. This means the stacking model cannot exploit the strengths and minimise the weaknesses of the differences in the models, leading to approximately the same performance as its component models. 
 
-\drafting{
-    \begin{itemize}
-        \item All models have best performance on feature vectors of a similar dimension. Suggest this is because this is the best dimension for this text corpus for representing the information relevent to the rating. It is a good thing this is independent of the model since\dots
-        \item As expected the Binary-SVM performed worse than the SVM classifiers using a ovr approach to multi-class classification. This is consistent with literature. Note that is is a lot faster though.
-        \item All classifiers cap at around the same performance accross all metrics, including the stacking classifier. It is possible that this is just the best that can be done with this feature representation of the review text. Also can discuss how it is not reasonable to expect perfect prediction even given a perfect representation of text features: the review score gives a (human) reader context for the sentiment of the review text. eg ``chips were good'' with a 1 and 5 star review gives very different impressions (maybe think of a better example).
-    \end{itemize}
-}
+Another possible reason that all models had similar performance is that this reflects the inherent difficultly of the classification task (with the selected features). It is likely that it is not possible to predict the rating enirely from the review text. Even for a human reader, the rating provides context by which to judge the sentiment of the review. For example the same review text may be interpreted as a genuine complement alongside a 5 star rating, but as sarcastic alongside a 1 star rating.
+
+All models perform best paragraph vector encodings of around the same dimension. This suggests that this is the best dimension of paragraph vector encoding for this training corpus for representing the information in the text relevant to the rating.
+
+Despite having the best performance of the SVM-based classifiers on unseen data, it appears that the RBF-SVM tends to overfit the training data. In Figure \ref{fig:learning-curve} we can see that the performance of RBF-SVM on the training set is significantly higher than on the test data. This is in contrast to the other classifiers, which have very similar performance on the training and testing data. This suggests RBF-SVM is learning a decision boundary which is tailored to the training data, and so, despite performing marginally worse, Linear-SVM has better generalised from the training data. This is consistent with the assumption that the data should be linearly separable discussed in Section \ref{subsec:method-svm}.
+
+As we can see in Figures \ref{fig:binary-cm}, \ref{fig:linear-cm}, \ref{fig:rbf-cm}, \ref{fig:lr-cm} and \ref{fig:stack-cm} the main difference in performance between the models comes from their ability to distinguish the negative and neural sentiment classes. All models were, to varying degrees, biased towards predicting the text to be more positive than it was, with the upper triangle of the confusion matrix containing the most incorrect predictions. One reason for this is that the data contains mostly positive and neutral examples. If the prior probability of a class is higher, it makes sense that a classifier would predict it more frequently and thus be more often incorrect when guessing this class. Another factor in this may be is that the distinction between negative and neutral, and neutral and positive sentiment language is not very clear. This, combined with the differences in prior probability, would lead to the observed tendency of models to frequently predict one class more positive.
+
+The Binary-SVM model (F-score of 0.758) performed worse than the Linear-SVM model (F-score of 0.821) which is consistent with results in the literature \cite{koppel_importance_2006}. This means that the assumptions about the text data discussed in Section \ref{subsec:method-svm} which would lead to good performance of the Binary-SVM model are too strong. It is likely that the language used in positive and negative reviews is not completely opposite, so paragraph vector encodings of these reviews do not lie along a line.
+
+One major improvement we could make would be to attempt to simplify texts linguistically prior to producing the paragraph vector encodings. In the simplest case this could involve using an automated spell checker on the reviews, and in more complex cases undoing negatives (``not bad'' $\mapsto$ ``good'') and identifying common phrases or idioms. Given enough examples, the paragraph vector encoding should be able to account for this without preprocessing, since words and phrases with similar meanings should be close in the feature space. However it is likely that there are not enough examples of misspellings and unusual phrasings in the training set to do this effectively in all cases.
+
+\drafting{more improvements?}
+
 
 \section{Conclusion}
 \drafting{Summarise main points and (possibly) future work.}

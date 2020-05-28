@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import seaborn as sns;
 from sklearn.metrics import ConfusionMatrixDisplay
-
 sns.set()
 
 def captialize(word):
@@ -91,67 +91,67 @@ def gridsearch_heatmap_1d(ax, df, xax_col, val_col, lims=None):
     heat_map = heat_map.transpose()
 
     sns.heatmap(heat_map, vmin=vmin, vmax=vmax, ax=ax, cmap="YlGnBu", xticklabels=False, yticklabels=xax_vals, square=True)
-def plot_confusion_matrix(cm, title):
+def plot_confusion_matrix(cm):
+
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['1', '3', '5'])
     disp.plot(include_values='true',
               cmap=plt.cm.Blues)
     plt.grid(b=False)
-    plt.title(title,
-              weight="bold", size=14)
+
     plt.ylabel('True Rating')
     plt.xlabel('Predicted Rating')
+    plt.tight_layout()
     plt.show()
+
+def row_normalise(a):
+
+    row_sum = a.sum(axis=1)
+    return (a.transpose() / row_sum).transpose()
 
 if __name__ == "__main__":
 
-    gridsearch = pd.read_csv("./results/svm/gridsearch_polar_125.csv", sep=', ')
-    
+    color_map = cm.get_cmap("YlGnBu")
 
-    
+    colors = color_map(np.linspace(0.4, 1, 4))
 
-    #gridsearch = gridsearch[(gridsearch['C'] <= 1.5) & (gridsearch['C'] >= 0.005)]
-
-    """
-    cs = np.array(gridsearch['C'])
-    fs = np.array(gridsearch['fscore'])
-
-    colspace = np.linspace(0.007, 1.5, 214)
-
-    hm_data = np.empty((len(colspace), 2))
-    for i, C in enumerate(colspace):
-
-        hm_data[i][0] = C
-
-        int_fscore = fs[np.argmin(np.absolute(cs - C))]
-
-        hm_data[i][1] = int_fscore
-
-
-    hm_data = pd.DataFrame(hm_data)
-    hm_data.columns = ['C', 'fscore']
-    print(hm_data)
-
-
-    """
-
-    xax_col = 'C'
-    yax_col = 'thresh'
-    val_col = 'fscore'
-    
-    
+    colors = ['c', 'g', 'r', 'b']
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
+    learning_curves = [("./results/svm/learning_curve_binary_final_train.csv", "./results/svm/learning_curve_binary_final_test.csv"), 
+     ("./results/svm/learning_curve_linear_final_train.csv", "./results/svm/learning_curve_linear_final_test.csv"),
+     ("./results/svm/learning_curve_rbf_final_train.csv", "./results/svm/learning_curve_rbf_final_test.csv"), 
+     ("./results/lgr/learning_curve_train.csv", "./results/lgr/learning_curve_test.csv")]
+    
+    
+    names = ["Binary-SVM", "Linear-SVM", "RBF-SVM", "LR"]
+
+    for color, files, name in zip(colors, learning_curves, names):
+
+        if name == "Binary-SVM":
+            continue
+
+        train_file, test_file = files
+        
+        sep = "," if name == "LR" else ", "
+
+        train_lc = pd.read_csv(train_file, sep=sep)
+        test_lc = pd.read_csv(test_file, sep=sep)
+
+
+        ax.plot(train_lc["dim"], train_lc["fscore"], color=color, linestyle="--", label=f"{name} Train", marker=".")
+        ax.plot(test_lc["dim"], test_lc["fscore"], color=color, linestyle="-", label=f"{name} Test", marker=".")
+    
+    ax.legend(loc='best', fontsize="x-small")
+    ax.set_xlabel("Dimension")
+    ax.set_ylabel("F-Score")
+    ax.set_ylim(bottom=0.75, top=1)
+    ax.set_xlim(left=0, right=300)
+    ax.set_facecolor('w')
+
     fig.tight_layout()
 
-    
-    gridsearch_heatmap(ax, gridsearch, xax_col, yax_col, val_col)
-
-    ax.set_xlabel("$C$ $(\\times 10 ^{-3})$")
-    ax.set_ylabel("$p_T$")
-
     plt.show()
-
 
     
