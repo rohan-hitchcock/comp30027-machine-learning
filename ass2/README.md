@@ -3,13 +3,11 @@
 
 ## Assignment 2: This review sounds positive!
 
-###### Submission deadline: 7 pm, Monday 20 Apr 2020
+###### Submission deadline: 11AM, Friday 29 May 2020
 
 **Student Name(s):**    Patrick Randell, Rohan Hitchcock
 
 **Student ID(s):**     836026, 836598
-
-##### Questions Answered: Q1, Q2, Q4, Q5
 
 
 ## How to Generate all text features used in our code
@@ -18,11 +16,13 @@ The file `generate_docvecs.py` contains the functions used to generate train/tes
     * This was used to generate splits used for the learning curves of all models
 * `compute_crossval_split(dim, num_splits)`
     * This was used for the optimal dimensions of each model (125, and 150)
+* functions within this file also load cross validation splits and random holdouts from file after they have been created
     
 ## How to use relevant code
 * ##### Feature Selection: `pca.py`
 * ##### SVM: `svm.py`
-    * PolarizedSvm class in `polarized_svm.py`
+    * This file contains a demonstration of how to run each model on the whole training set
+    * PolarizedSvm class in `polarized_svm.py` and imported into this file. In our report PolarizedSVM was renamed to Binary-SVM since this is more clear.
 * ##### Logistic Regression: `mlr.py`
 * ##### Stacking: `stacking.py`
 * ##### Final shared plots: `plotting.py`
