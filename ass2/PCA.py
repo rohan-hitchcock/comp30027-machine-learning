@@ -95,9 +95,6 @@ def plot_pca_components_2d(datasets_dict, low_rating, med_rating, high_rating):
         if i == 2:
             plt.legend(loc='auto', shadow=True, title="Class Rating",
                        title_fontsize=10)
-            plt.title(f"Truncated SVD for {name}", weight="bold", size=12)
-        else:
-            plt.title(f"PCA for {name}", weight="bold", size=12)
 
     plt.tight_layout()
     plt.show()
