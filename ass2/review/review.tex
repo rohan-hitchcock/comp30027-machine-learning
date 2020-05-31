@@ -29,42 +29,19 @@
 
 \section*{Report 1 review}
 
-\drafting{
-Not exactly sure how to start with summarising what they've done. Something about them tackling sentiment analysis with a mixture of popular linear classifiers, both probabalistic and deterministic? But their motivations for their approach don't exist.
-}
+This report approaches the task of predicting the ratings of restaurant reviews from review text by employing several classifiers popular in sentiment analysis, including Gaussian na\"{i}ve Bayes, support vector machine, and logistic regression classifiers. 
 
-The analysis of selected models for the task is extensive. The authors thorough investigation into their models parameters is reflected by the increase in final prediction accuracy.
+The analysis of selected models for the task is quite extensive. The report documents a thorough investigation into several models' hyperparameters, which resulted in a significant increases in prediction accuracy for the final models.
 
-This report would benefit from some restructuring. A clear method, with the motivations behind decisions made backed by relevant literature, should precede any results or analysis.
-The author makes assumptions about the readers understanding at times, resulting in unclear terminology and values. In particular, it is not clear what values the numbers in section 3.2.1 are referring to, or what SGD stands for in section 3.3.2. These kinds of oversights occur throughout.
+This report would benefit by including extended discussion of the motivation behind decisions, and a discussion of the literature surrounding the topics covered. Not including this obscures the assumptions the author(s) are making, making it difficult for a reader to assess whether they are reasonable or not. It also makes the direction of the report unclear, and excluding a discussion of related literature makes the report less accessible to readers' and further hampers their ability to assess the methodology. 
 
-The underlying machine learning concepts behind Scikit Learn library functions should be used rather than the functions themselves (LinearSVC in particular is a SVM).
-A closer attention to formatting, including consistent decimal places, spacing, and labelling would improve the overall readability of the report.
-
-\begin{itemize}
-    \item Discussion of literature is non-existent. The only reference which is not the datasets is to a blog post.
-    \item more theoretical analysis everywhere 
-    \item Always need to say what the numbers are (are the decimals in 3.2.1 accuracy? fscore? -- this occurs throughout)
-    \item Need to explain the reasons for doing things more often (why feature 83 and 30?) 
-    \item Using acronyms without explaining them (SGD), names of files, method names from specific implementations is extremely unhelpful (so are terminal screenshots)
-    \item Use expected terminology, Figure 6 is a confusion matrix. SVC is sklearn terminology.
-    \item Formatting problems are distracting 
-    \item The number of decimal places in Table 2 is ridiculous, and why accuracy is a tuple is not clear
-    \item Is increasing accuracy from 0.822 to 0.843 a `huge' increase?
-\end{itemize}
-
+This report would also benefit from improved formatting and presentation. Formatting problems such as missing spaces, significant variation in the style of tables, figures of raw terminal output containing extraneous information, and including an unreasonable number of significant figures are distracting to a reader and detract from the overall readability of the report. The names of general concepts should be used, rather than implementation-specific terminology (such as method names or file names), so readers can connect their existing knowledge to the concepts being discussed. Additionally, values are often included without explaining what they are (e.g. accuracy, F-score, etc.) which means the reader needs to guess.
 
 \section*{Report 2 review}
-This report presented an approach to text sentiment analysis which is based on sophisticated feature generation and selection. The approach to feature generation and selection presented in this report is well considered, and appears to be based on a robust statistical understanding of natural language processing. This is reflected in the strong performance of the final classifier. 
+This report presented an approach to text sentiment analysis which is based on sophisticated feature generation and selection. The report details several different methods of feature generation, and assesses the performance of a number models on the generated features, eventually adopting a homogeneous ensemble approach.
 
-This report would benefit from more explanation of the theory behind the techniques. While the efficacy of the techniques is clear from the experimental data presented, it is not clear why this is the case. In particular, it would be good to include a discussion of why different classifiers had different performance with the selected features, and why the generated features result in strong model performance. Along these lines, this report would be improved by including a more comprehensive introduction to the feature generation techniques employed. In the reviewers' opinion, the assumption that readers are ``familiar with the basic theory of TF-IDF and n-gram vectorised representation of text'' is not reasonable, and failing to include a detailed discussion of this makes the remainder of the report less accessible. Additionally, including more references to literature would help guide a reader looking to explore the topics discussed here further.
+The overall approach discussed in this report is creative and interesting. In particular, the feature generation and selection techniques are well considered, and appear to be based on a robust statistical understanding of natural language processing. This is reflected in the strong performance of the final classifier. Decisions are often justified using experimental data, which provides clear motivation for final methodology, and also allows readers better assess these decisions independently.
 
-\begin{itemize}
-    \item Would benefit from more direct explanation at times
-    \item Need to introduce TF-IDF and n-grams
-    \item The relevance of much of the introduction is not clear
-    \item more references 
-    \item less figures
-    \item Feature selection is cool
-\end{itemize}
+This report would benefit from more explanation of the theory behind the techniques. While the efficacy of the techniques is clear from the experimental data presented, it is not clear why this is the case. In particular, it would be good to include a discussion of why different classifiers had different performance with the selected features, and why the generated features result in strong model performance (even if this discussion is somewhat speculative). Along these lines, this report would be improved by including a more comprehensive introduction to the feature generation techniques employed. In the reviewers' opinion, the assumption that readers are ``familiar with the basic theory of TF-IDF and n-gram vectorised representation of text'' is not reasonable, and failing to include a detailed discussion of this makes the remainder of the report less accessible. Although interesting, the introductory discussion of natural language processing and polarity classification in general is not strictly relevant to the remainder of the report, and it would be better to prioritise a discussion of the theory required to appreciate the techniques employed. In addition, including more references to literature would help guide a reader looking to explore these topics further.
+
 \end{document}
