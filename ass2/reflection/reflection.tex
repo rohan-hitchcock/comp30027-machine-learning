@@ -2,6 +2,10 @@
 
 \usepackage{fancyhdr}
 \usepackage{geometry}
+\usepackage[dvipsnames]{xcolor}
+
+%used for identifying drafting or notes
+\newcommand{\drafting}[1]{\textcolor{OliveGreen}{#1}}
 
 \geometry{tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
 
@@ -21,12 +25,25 @@
 \date{}
 \maketitle
 
-Discuss (400 -- 600 words):
+We approached the task predicting the star rating of restaurant reviews by using a selection of support vector machine (SVM) and logistic regression classifiers, which use paragraph vector (doc2vec) encodings of the review text as features. We identified this as a sentiment analysis task, and begun by reading literature on sentiment analysis techniques. We focused our attention on review and survey articles which provided a comparison of many different sentiment analysis methods, and on this basis chose to pursue SVM and logistic regression based classifiers. We also researched paragraph vector encoding so we could better understand how the features it generated would work in our model. We then performed initial tests to narrow down the number of variables we needed to consider (such as to reduce the number of kernels we were investigating).
+
+We believe we presented a comprehensive investigation and analysis of the models we selected which was informed both by an understanding of the literature and the results we observed in the process of completing the assignment. \drafting{Extend this}
+
+One key aspect we could have improved, which was briefly discussed in our report, was add a preprocessing step to linguistically simplify text prior to the paragraph vector encoding step. This could have involved: using a spell checker to automatically correct typos and misspellings, attempting to simplify negated words (such as converting ``not good'' to ``bad''), and identifying common phrases and idioms. Although paragraph vector encoding is theoretically able to account for this, it likely requires many examples of synonymous phrases in order to map them properly to the feature space.
+
+We could have also improved the overall presentation and usability of our code. As it stands, changes need to be made in the source code to select different models and hyperparameters. This flexibility was helpful while we were experimenting with different ideas, but it is currently not very usable outside of that setting. \drafting{idk if this is really a genuine area for improvement, since it wasn't really the point of the task.}
+\\
+\\
+\drafting{Individual contributions}
+\\
+
+\drafting{ Discuss (400 -- 600 words):
 \begin{itemize}
     \item Critical reflection on the process of completing this project.
     \item What were we satisfied with?
     \item What could be improved?
     \item What are the individual contributions?
 \end{itemize}
+}
 
 \end{document}
